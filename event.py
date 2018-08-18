@@ -8,7 +8,7 @@ from base import Base
 event_user_association = Table(
     'event_user', Base.metadata,
     Column('event_id', Integer, ForeignKey('event.id')),
-    Column('user_id', Integer, ForeignKey('user.id'))
+    Column('users_id', Integer, ForeignKey('users.id'))
 )
 
 
@@ -16,13 +16,13 @@ class Event(Base):
     __tablename__ = 'event'
 
     id = Column(Integer, primary_key=True)
-    event_author = Column(String)
+    event_author = Column(String, nullable=False) # FK
     topic = Column(String)
-    language_level = Column(Integer)
-    date = Column(Date)
-    max_members = Column(Integer)
+    language_level = Column(Integer, nullable=False) # FK
+    date = Column(Date, nullable=False)
+    max_members = Column(Integer, nullable=False)
     current_num_members = Column(Integer)
-    created = Column(Date)
+    created = Column(Date, nullable=False)
     updated = Column(Date)
     users = relationship("User", secondary=event_user_association)
 

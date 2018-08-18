@@ -16,9 +16,16 @@ session = Session()
 
 # 3 - extract all events
 events = session.query(Event).all()
+users = session.query(User).all()
 
 # 4 - print events' details
 print('\n### All events:')
 for event in events:
     print(f'{event.topic} was released on {event.created}')
+print('')
+
+# 5 - print users' details
+print('\n### All users:')
+for user in users:
+	print(f'{user.name}')
 print('')

@@ -7,34 +7,34 @@ from base import Base
 
 
 class User(Base):
-    __tablename__ = 'user'
+    __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    gender = Column(String)
-    birthday = Column(Date)
+    gender = Column(String, nullable=False)
+    birthday = Column(Date, nullable=False)
     info = Column(Text)
     photo = Column(Integer)
-    language_level = Column(Integer)
-    # phone = Column(PhoneNumberType(), nullable=False, unique=True)
-    _phone_number = Column(Unicode(20))
-    country_code = Column(Unicode(8))
+    language_level = Column(Integer) # FK M2M
+    phone = Column(String) # Column(PhoneNumberType(), nullable=False, unique=True)
+    # _phone_number = Column(Unicode(20))
+    # country_code = Column(Unicode(8))
 
-    phonenumber = orm.composite(
-        PhoneNumber,
-        _phone_number,
-        country_code
-    )
+    # phonenumber = orm.composite(
+    #     PhoneNumber,
+    #     _phone_number,
+    #     country_code
+    # )
 
-    email = Column(EmailType)
-    facebook = Column(String)
-    instagram = Column(String)
-    twitter = Column(String)
+    email = Column(EmailType, nullable=False, unique=True)
+    facebook = Column(String, unique=True)
+    instagram = Column(String, unique=True)
+    twitter = Column(String, unique=True)
     password = Column(String, nullable=False)
-    country = Column(CountryType)
+    country = Column(String)# CountryType, nullable=False)
     city = Column(String)
-    rating = Column(Numeric)
-    created = Column(Date)
+    rating = Column(Integer)# Numeric)
+    created = Column(Date, nullable=False)
     updated = Column(Date)
     deleted = Column(Boolean)
 
