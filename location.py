@@ -1,7 +1,7 @@
 # coding=utf-8
 
-from sqlalchemy import Column, String, Integer, Date, Text, Numeric
-
+from sqlalchemy import Column, String, Integer, Date, Text, Numeric, ForeignKey
+from sqlalchemy.orm import relationship
 from base import Base
 
 
@@ -15,7 +15,8 @@ class Location(Base):
     country = Column(String, nullable=False)
     city = Column(String, nullable=False)
     address = Column(String)
-
+    event_id = Column(Integer, ForeignKey('event.id'))
+    car = relationship("Event")
     created = Column(Date, nullable=False)
     updated = Column(Date)
 

@@ -1,6 +1,7 @@
 # coding=utf-8
 
-from sqlalchemy import Column, String, Integer, Date, Text
+from sqlalchemy import Column, String, Integer, Date, Text, ForeignKey
+from sqlalchemy.orm import relationship
 
 from base import Base
 
@@ -12,6 +13,8 @@ class Language(Base):
     title = Column(String, nullable=False)
     level = Column(Integer, nullable=False)
     created = Column(Date, nullable=False)
+    # user_id = Column(Integer, ForeignKey('user.id'))
+    # user = relationship("User")
     # updated = Column(Date)
 
     def __init__(self, title, level, created):

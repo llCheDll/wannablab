@@ -22,10 +22,12 @@ users = session.query(User).all()
 print('\n### All events:')
 for event in events:
     print(f'{event.topic} was released on {event.created}')
+    print('event members: ')
+    for member in event.members:
+        print(f'{member.name}')
 print('')
-
 # 5 - print users' details
 print('\n### All users:')
 for user in users:
-	print(f'{user.name}')
+    print(f'{user.name}')
 print('')
