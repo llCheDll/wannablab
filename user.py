@@ -31,6 +31,7 @@ class User(Base):
     #     _phone_number,
     #     country_code
     # )
+    # messages = relationship("Message")
 
     email = Column(EmailType, nullable=False, unique=True)
     facebook = Column(String, unique=True)

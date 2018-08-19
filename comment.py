@@ -10,8 +10,9 @@ class Comment(Base):
 
     id = Column(Integer, primary_key=True)
     # recipient = FK M2M
+    author = Column(String)
     text = Column(Text, nullable=False)
-    user_id = Column(Integer, ForeignKey('user.id'))
+    receiver = Column(Integer, ForeignKey('user.id'))
     created = Column(Date, nullable=False)
     updated = Column(Date)
     deleted = Column(Boolean)

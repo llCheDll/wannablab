@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from sqlalchemy import Column, String, Integer, Date, Table, ForeignKey
+from sqlalchemy import Column, String, Integer, Date, Table, ForeignKey, Text
 from sqlalchemy.orm import relationship
 
 from base import Base
@@ -19,11 +19,12 @@ class Event(Base):
     user_id = Column(Integer, ForeignKey('user.id'))
     event_author = relationship("User")
     topic = Column(String)
+    text = Column(Text)
     language_level = Column(Integer, nullable=False) # FK
     date = Column(Date, nullable=False)
     max_members = Column(Integer, nullable=False)
     members = relationship("User", secondary=event_user_association)
-    current_num_members = Column(Integer)
+    current_num_members = Column(Integer) # ???
     created = Column(Date, nullable=False)
     updated = Column(Date)
     # users = relationship("User", secondary=event_user_association)
@@ -32,10 +33,11 @@ class Event(Base):
     language_id = Column(Integer, ForeignKey('language.id'))
     language = relationship("Language")
 
-    def __init__(self, topic, language_level, date, max_members, current_num_members, created, updated):
+    def __init__(self, topic, text, language_level, date, max_members, current_num_members, created, updated):
         self.topic = topic
         self.language_level = language_level
         # self.event_author = event_author
+        self.text = text
         self.date = date
         self.max_members = max_members
         self.current_num_members = current_num_members
