@@ -24,27 +24,34 @@ session = Session()
 for x in range(500):
     i = x
 
-    user = 'user_' + str(x)
-    event = 'event_' + str(x)
-    language = 'language_' + str(x)
-    comment = 'comment_' + str(x)
-    category = 'category_' + str(x)
-    message = 'message_' + str(x)
-    location = 'location_' + str(x)
-
-    receiver = 'receiver_' + str(x)
+    user_name = 'user_' + str(x)
+    event_name = 'event_' + str(x)
+    language_name = 'language_' + str(x)
+    comment_name = 'comment_' + str(x)
+    category_name = 'category_' + str(x)
+    message_name = 'message_' + str(x)
+    location_name = 'location_' + str(x)
+    receiver_name = 'receiver_' + str(x)
 
     location = Location(x, x+1, x, x, x, date(2002, 10, 11), date(2002, 10, 11), False)
-    language = Language(language, 2, date(2002, 10, 11))
-    category = Category(category, date(2002, 10, 11), date(2002, 10, 12), False)
-    user = User(user, "Man", date(2002, 10, 11), "some text...", 42, 5, "3067", user, user, user, user,
-        "password", "us", "Denver", 4, date(2018, 10, 11), date(2002, 10, 11), False)
-    event =  Event(event, "some text...", 3, date(2002, 10, 11), 5, 3, date(2002, 10, 11), date(2002, 10, 11))
-    comment = Comment(comment, date(2002, 10, 11), date(2002, 10, 12), False)
-    message = Message(message, date(2002, 10, 11), True, date(2002, 10, 11), False)
+    language = Language(language_name, 2, date(2002, 10, 11))
+    category = Category(category_name, date(2002, 10, 11), date(2002, 10, 12), False)
 
-    receiver = User(receiver, "Girl", date(2002, 10, 11), "some text...", 42, 5, "3067", user, user, user, user,
+    user = User(user_name, "Man", date(2002, 10, 11), "some text...", 42, 5, "3067", user_name, user_name, user_name, user_name,
         "password", "us", "Denver", 4, date(2018, 10, 11), date(2002, 10, 11), False)
+
+    event =  Event(event_name, "some text...", 3, date(2002, 10, 11), 5, 3, date(2002, 10, 11), date(2002, 10, 11))
+    comment = Comment(comment_name, date(2002, 10, 11), date(2002, 10, 12), False)
+
+    receiver = User(receiver_name, "Man", date(2002, 10, 11), "some text...", 42, 5, "3067", receiver_name, receiver_name, receiver_name, receiver_name,
+        "password", "us", "Denver", 4, date(2018, 10, 11), date(2002, 10, 11), False)
+
+    session.add(user)
+    session.add(receiver)
+    session.commit()
+
+
+    message = Message(message_name, date(2002, 10, 11), user.id, receiver.id, True, date(2002, 10, 11), False)
 
 # add members to events
     event.members = [user, user, user, user]
@@ -58,12 +65,10 @@ for x in range(500):
 # add author to event
     event.event_author = user
 
-# add receiver to message
-    message.receiver = receiver
-
 # persists data
     session.add(event)
-    session.add(user)
+    # session.add(user)
+    # session.add(receiver)
     session.add(language)
     session.add(comment)
     session.add(message)

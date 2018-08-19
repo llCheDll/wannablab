@@ -16,14 +16,16 @@ class Event(Base):
     __tablename__ = 'event'
 
     id = Column(Integer, primary_key=True)
+    
     user_id = Column(Integer, ForeignKey('user.id'))
     event_author = relationship("User")
+    members = relationship("User", secondary=event_user_association)
+
     topic = Column(String)
     text = Column(Text)
     language_level = Column(Integer, nullable=False) # FK
     date = Column(Date, nullable=False)
     max_members = Column(Integer, nullable=False)
-    members = relationship("User", secondary=event_user_association)
     current_num_members = Column(Integer) # ???
     created = Column(Date, nullable=False)
     updated = Column(Date)
