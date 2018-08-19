@@ -16,7 +16,7 @@ class Location(Base):
     city = Column(String, nullable=False)
     address = Column(String)
     event_id = Column(Integer, ForeignKey('event.id'))
-    car = relationship("Event")
+    event = relationship("Event")
     created = Column(Date, nullable=False)
     updated = Column(Date)
 
