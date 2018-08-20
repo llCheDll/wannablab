@@ -1,6 +1,5 @@
 *.py[cod]
 __pycache__
 
-idea/
+.idea/
 venv/
-
