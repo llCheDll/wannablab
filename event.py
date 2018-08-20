@@ -5,10 +5,10 @@ from sqlalchemy.orm import relationship
 
 from base import Base
 
-event_user_association = Table(
+event_members_association = Table(
     'event_user', Base.metadata,
     Column('event_id', Integer, ForeignKey('event.id')),
-    Column('user_id', Integer, ForeignKey('user.id'))
+    Column('member_id', Integer, ForeignKey('user.id'))
 )
 
 
@@ -17,23 +17,29 @@ class Event(Base):
 
     id = Column(Integer, primary_key=True)
     
-    user_id = Column(Integer, ForeignKey('user.id'))
+    author_id = Column(Integer, ForeignKey('user.id'))
     event_author = relationship("User")
-    members = relationship("User", secondary=event_user_association)
+    
+    members = relationship("User", secondary=event_members_association)
 
     topic = Column(String)
     text = Column(Text)
-    language_level = Column(Integer, nullable=False) # FK
+    
     date = Column(Date, nullable=False)
     max_members = Column(Integer, nullable=False)
     current_num_members = Column(Integer) # ???
     created = Column(Date, nullable=False)
     updated = Column(Date)
-    # users = relationship("User", secondary=event_user_association)
+
+    location_id = Column(Integer, ForeignKey('location.id'))
+    location = relationship("Location")
+    
     category_id = Column(Integer, ForeignKey('category.id'))
     category = relationship("Category")
+    
     language_id = Column(Integer, ForeignKey('language.id'))
     language = relationship("Language")
+    language_level = Column(Integer, nullable=False) # FK
 
     def __init__(self, topic, text, language_level, date, max_members, current_num_members, created, updated):
         self.topic = topic

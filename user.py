@@ -41,7 +41,6 @@ class User(Base):
     country = Column(String)# CountryType, nullable=False)
     city = Column(String)
     rating = Column(Integer)# Numeric)
-    comments = relationship("Comment")
     created = Column(Date, nullable=False)
     updated = Column(Date)
     deleted = Column(Boolean)

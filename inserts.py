@@ -31,7 +31,7 @@ for x in range(500):
     category_name = 'category_' + str(x)
     message_name = 'message_' + str(x)
     location_name = 'location_' + str(x)
-    receiver_name = 'receiver_' + str(x)
+    recipient_name = 'recipient_' + str(x)
 
     location = Location(x, x+1, x, x, x, date(2002, 10, 11), date(2002, 10, 11), False)
     language = Language(language_name, 2, date(2002, 10, 11))
@@ -41,17 +41,17 @@ for x in range(500):
         "password", "us", "Denver", 4, date(2018, 10, 11), date(2002, 10, 11), False)
 
     event =  Event(event_name, "some text...", 3, date(2002, 10, 11), 5, 3, date(2002, 10, 11), date(2002, 10, 11))
-    comment = Comment(comment_name, date(2002, 10, 11), date(2002, 10, 12), False)
 
-    receiver = User(receiver_name, "Man", date(2002, 10, 11), "some text...", 42, 5, "3067", receiver_name, receiver_name, receiver_name, receiver_name,
+    recipient = User(recipient_name, "Man", date(2002, 10, 11), "some text...", 42, 5, "3067", recipient_name, recipient_name, recipient_name, recipient_name,
         "password", "us", "Denver", 4, date(2018, 10, 11), date(2002, 10, 11), False)
-
+    
     session.add(user)
-    session.add(receiver)
+    session.add(recipient)
     session.commit()
-
-
-    message = Message(message_name, date(2002, 10, 11), user.id, receiver.id, True, date(2002, 10, 11), False)
+    
+    comment = Comment(user.id, recipient.id, comment_name, date(2002, 10, 11), date(2002, 10, 12), False)
+    
+    message = Message(message_name, date(2002, 10, 11), user.id, recipient.id, True, date(2002, 10, 11), False)
 
 # add members to events
     event.members = [user, user, user, user]
@@ -67,8 +67,6 @@ for x in range(500):
 
 # persists data
     session.add(event)
-    # session.add(user)
-    # session.add(receiver)
     session.add(language)
     session.add(comment)
     session.add(message)

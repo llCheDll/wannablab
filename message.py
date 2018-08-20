@@ -17,9 +17,11 @@ class Message(Base):
     recipient = relationship("User", foreign_keys=[recipient_id])
     
     text = Column(Text, nullable=False)
+    
     created = Column(Date, nullable=False)
-    received = Column(Boolean, nullable=False)
     updated = Column(Date)
+    
+    received = Column(Boolean, nullable=False)
     deleted = Column(Boolean)
 
     def __init__(self, text, created, author_id, recipient_id, received, updated, deleted):
