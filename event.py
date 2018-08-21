@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 from base import Base
 
 event_members_association = Table(
-    'event_user', Base.metadata,
+    'event_members', Base.metadata,
     Column('event_id', Integer, ForeignKey('event.id')),
     Column('member_id', Integer, ForeignKey('user.id'))
 )

@@ -41,9 +41,22 @@ class User(Base):
     country = Column(String)# CountryType, nullable=False)
     city = Column(String)
     rating = Column(Integer)# Numeric)
+    #_ratings = Column(db.String, default='0.0')
+    #
+    # @property
+    # def ratings(self):
+    #     return [float(x) for x in self._ratings.split(';')]
+    
+    # @ratings.setter
+    # def ratings(self, value):
+    #     self._ratings += ';%s' % value
+    
     created = Column(Date, nullable=False)
     updated = Column(Date)
     deleted = Column(Boolean)
+    
+    friend_id = Column(Integer, ForeignKey('friends.id'))
+    friend = relationship("Friends")
 
     def __init__(self, name, gender, birthday, info, photo, language_level, phone, email, facebook, instagram, twitter,
         password, country, city, rating, created, updated, deleted):

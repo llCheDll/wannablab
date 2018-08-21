@@ -13,6 +13,7 @@ from user import User
 from language import Language
 from message import Message
 from location import Location
+from friends import Friends
 
 # generate database schema
 Base.metadata.create_all(engine)
