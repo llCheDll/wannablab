@@ -9,7 +9,7 @@ class Friends(Base):
     __tablename__ = 'friends'
 
     id = Column(Integer, primary_key=True)
-    friend_with = Column(Integer, nullable=False)
+    user_id = Column(Integer, nullable=False)
 
-    def __init__(self, friend_with):
-        self.friend_with = friend_with
+    def __init__(self, user_id):
+        self.user_id = user_id

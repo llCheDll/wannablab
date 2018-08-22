@@ -4,6 +4,8 @@ from sqlalchemy import Column, String, Integer, Date, Text, Unicode, orm, Boolea
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import PhoneNumber, EmailType, CountryType
 
+from passlib.hash import bcrypt
+
 from base import Base
 
 user_language_association = Table('user_language', Base.metadata,
@@ -15,14 +17,16 @@ class User(Base):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, nullable=False)
     gender = Column(String, nullable=False)
     birthday = Column(Date, nullable=False)
     info = Column(Text)
     photo = Column(Integer)
+    
     language = relationship("Language", secondary=user_language_association)
-    language_level = Column(Integer) # FK M2M - ???
-    phone = Column(String) # Column(PhoneNumberType(), nullable=False, unique=True)
+    # language_level = Column(Integer)  FK M2M - ???
+    
     # _phone_number = Column(Unicode(20))
     # country_code = Column(Unicode(8))
 
@@ -33,6 +37,7 @@ class User(Base):
     # )
     # messages = relationship("Message")
 
+    phone = Column(String) # Column(PhoneNumberType(), nullable=False, unique=True)
     email = Column(EmailType, nullable=False, unique=True)
     facebook = Column(String, unique=True)
     instagram = Column(String, unique=True)
@@ -41,6 +46,7 @@ class User(Base):
     country = Column(String)# CountryType, nullable=False)
     city = Column(String)
     rating = Column(Integer)# Numeric)
+
     #_ratings = Column(db.String, default='0.0')
     #
     # @property
@@ -58,9 +64,10 @@ class User(Base):
     friend_id = Column(Integer, ForeignKey('friends.id'))
     friend = relationship("Friends")
 
-    def __init__(self, name, gender, birthday, info, photo, language_level, phone, email, facebook, instagram, twitter,
+    def __init__(self, first_name, last_name, gender, birthday, info, photo, language_level, phone, email, facebook, instagram, twitter,
         password, country, city, rating, created, updated, deleted):
-        self.name = name
+        self.first_name = first_name
+        self.last_name = last_name
         self.gender = gender
         self.birthday = birthday
         self.info = info
@@ -71,6 +78,7 @@ class User(Base):
         self.facebook = facebook
         self.instagram = instagram
         self.twitter = twitter
+        # self.password = bcrypt.encrypt(password)
         self.password = password
         self.country = country
         self.city = city
@@ -78,3 +86,6 @@ class User(Base):
         self.created = created
         self.updated = updated
         self.deleted = deleted
+        
+    # def validate_password(self, password):
+    #     return bcrypt.verify(password, self.password)

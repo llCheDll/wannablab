@@ -13,9 +13,9 @@ class Language(Base):
     title = Column(String, nullable=False)
     level = Column(Integer, nullable=False)
     created = Column(Date, nullable=False)
+    # updated = Column(Date, nullable=False)
     # user_id = Column(Integer, ForeignKey('user.id'))
     # user = relationship("User")
-    # updated = Column(Date)
 
     def __init__(self, title, level, created):
         self.title = title

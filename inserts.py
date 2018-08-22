@@ -38,12 +38,12 @@ for x in range(500):
     language = Language(language_name, 2, date(2002, 10, 11))
     category = Category(category_name, date(2002, 10, 11), date(2002, 10, 12), False)
 
-    user = User(user_name, "Man", date(2002, 10, 11), "some text...", 42, 5, "3067", user_name, user_name, user_name, user_name,
+    user = User(user_name, user_name, "Man", date(2002, 10, 11), "some text...", 42, 5, "3067", user_name, user_name, user_name, user_name,
         "password", "us", "Denver", 4, date(2018, 10, 11), date(2002, 10, 11), False)
 
     event =  Event(event_name, "some text...", 3, date(2002, 10, 11), 5, 3, date(2002, 10, 11), date(2002, 10, 11))
 
-    recipient = User(recipient_name, "Man", date(2002, 10, 11), "some text...", 42, 5, "3067", recipient_name, recipient_name, recipient_name, recipient_name,
+    recipient = User(recipient_name, recipient_name, "Man", date(2002, 10, 11), "some text...", 42, 5, "3067", recipient_name, recipient_name, recipient_name, recipient_name,
         "password", "us", "Denver", 4, date(2018, 10, 11), date(2002, 10, 11), False)
     
     session.add(user)
@@ -72,6 +72,8 @@ for x in range(500):
     session.add(comment)
     session.add(message)
     session.add(location)
+    
+    
 
 # commit and close session
 session.commit()
