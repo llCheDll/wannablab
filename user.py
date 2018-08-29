@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from sqlalchemy import Column, String, Integer, Date, Text, Unicode, orm, Boolean, Numeric, Table, ForeignKey
+from sqlalchemy import Column, String, Integer, Date, Text, Unicode, orm, Boolean, Numeric, Table, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import PhoneNumber, EmailType, CountryType
 
@@ -11,6 +11,12 @@ from base import Base
 user_language_association = Table('user_language', Base.metadata,
     Column('user_id', Integer, ForeignKey('user.id')),
     Column('language_id', Integer, ForeignKey('language.id'))
+)
+
+friends_association_table = Table('friends', Base.metadata,
+    Column('first_user', Integer, ForeignKey('user.id'), primary_key=True),
+    Column('second_user', Integer, ForeignKey('user.id'), primary_key=True),
+    UniqueConstraint('first_user', 'second_user', name='unique_friendships')
 )
 
 class User(Base):
@@ -61,8 +67,9 @@ class User(Base):
     updated = Column(Date)
     deleted = Column(Boolean)
     
-    friend_id = Column(Integer, ForeignKey('friends.id'))
-    friend = relationship("Friends")
+    friends = relationship("User", secondary=friends_association_table, 
+        primaryjoin=id==friends_association_table.c.first_user,
+        secondaryjoin=id==friends_association_table.c.second_user)
 
     def __init__(self, first_name, last_name, gender, birthday, info, photo, language_level, phone, email, facebook, instagram, twitter,
         password, country, city, rating, created, updated, deleted):
