@@ -4,7 +4,7 @@ from sqlalchemy import Column, String, Integer, Date, Text, Unicode, orm, Boolea
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import PhoneNumber, EmailType, CountryType
 
-from passlib.hash import bcrypt
+# from passlib.hash import bcrypt
 
 from base import Base
 
@@ -71,28 +71,72 @@ class User(Base):
         primaryjoin=id==friends_association_table.c.first_user,
         secondaryjoin=id==friends_association_table.c.second_user)
 
-    def __init__(self, first_name, last_name, gender, birthday, info, photo, language_level, phone, email, facebook, instagram, twitter,
-        password, country, city, rating, created, updated, deleted):
+    def __init__(self,
+                 first_name,
+                 last_name,
+                 gender,
+                 birthday,
+                 info,
+                 # photo,
+                 language_id,
+                 phone,
+                 email,
+                 facebook,
+                 instagram,
+                 twitter,
+                 password,
+                 country,
+                 city,
+                 rating,
+                 created):
         self.first_name = first_name
         self.last_name = last_name
         self.gender = gender
         self.birthday = birthday
         self.info = info
-        self.photo = photo
-        self.language_level = language_level
+        # self.photo = photo
+        self.language = language_id
         self.phone = phone
         self.email = email
         self.facebook = facebook
         self.instagram = instagram
         self.twitter = twitter
-        # self.password = bcrypt.encrypt(password)
         self.password = password
         self.country = country
         self.city = city
         self.rating = rating
         self.created = created
-        self.updated = updated
-        self.deleted = deleted
-        
+        self.updated = None
+        self.deleted = False
+
+    def __str__(self):
+        user_string = (
+            f'user_id: \t{self.id}\n'
+            f'first_name: \t{self.first_name}\n'
+            f'last_name: \t{self.last_name}\n'
+            f'gender: \t{self.gender}\n'
+            f'birthday: \t{self.birthday}\n'
+            f'info: \t\t{self.info}\n'
+        )
+
+        for i in self.language:
+            user_string += f'language_id {i.id}: \t {i.title}(level_{i.level})\n'
+
+        user_string += (
+            f'phone: \t\t{self.phone}\n'
+            f'email: \t{self.email}\n'   
+            f'facebook: \t{self.facebook}\n'
+            f'instagram: \t{self.instagram}\n'
+            f'twitter: \t{self.twitter}\n'
+            f'password: \t{self.password}\n'
+            f'country: \t{self.country}\n'
+            f'city: \t\t{self.city}\n'
+            f'rating: \t{self.rating}\n'
+            f'created: \t{self.created}\n'
+            f'updated: \t{self.updated}\n'
+            f'deleted: \t{self.deleted}\n'
+        )
+        return user_string 
+           
     # def validate_password(self, password):
     #     return bcrypt.verify(password, self.password)

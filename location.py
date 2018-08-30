@@ -19,12 +19,12 @@ class Location(Base):
     created = Column(Date, nullable=False)
     updated = Column(Date)
 
-    def __init__(self, latitude, longitude, country, city, address, created, updated, deleted):
+    def __init__(self, latitude, longitude, country, city, address, created):
         self.latitude = latitude
         self.longitude = longitude
         self.country = country
         self.city = city
         self.address = address
         self.created = created
-        self.updated = updated
-        self.deleted = deleted
+        self.updated = None
+        self.deleted = False

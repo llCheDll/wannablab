@@ -15,8 +15,8 @@ class Category(Base):
     updated = Column(Date)
     deleted = Column(Boolean)
 
-    def __init__(self, title, created, updated, deleted):
+    def __init__(self, title, created):
         self.title = title
         self.created = created
-        self.updated = updated
-        self.deleted = deleted
+        self.updated = None
+        self.deleted = False

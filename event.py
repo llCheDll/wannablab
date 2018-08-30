@@ -44,13 +44,24 @@ class Event(Base):
     category = relationship("Category")
     
 
-    def __init__(self, topic, text, language_level, date, max_members, current_num_members, created, updated):
+    def __init__(self,
+                 author_id,
+                 topic,
+                 description,
+                 language_id,
+                 date,
+                 max_members,
+                 created,
+                 location_id,
+                 category_id):
+        self.author_id = author_id
         self.topic = topic
-        self.language_level = language_level
-        # self.event_author = event_author
-        self.text = text
+        self.description = description
+        self.language_id = language_id
         self.date = date
         self.max_members = max_members
-        self.current_num_members = current_num_members
+        self.current_num_members = 1
         self.created = created
-        self.updated = updated
+        self.updated = None
+        self.location_id = location_id
+        self.category_id = category_id
