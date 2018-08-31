@@ -65,3 +65,35 @@ class Event(Base):
         self.updated = None
         self.location_id = location_id
         self.category_id = category_id
+
+    def __str__(self):
+        event_string = (
+            f'event_id: \t{self.id}\n'
+            
+            f'author_id {self.event_author.id}: \t'
+            f'{self.event_author.first_name} {self.event_author.last_name}\n'
+
+            f'topic: \t{self.topic}\n'
+            f'description: \t{self.description}\n'
+            f'date: \t{self.date}\n'
+            f'max_members: \t\t{self.max_members}\n'
+            f'current_num_members: \t\t{self.current_num_members}\n'
+
+            f'language_id {self.language.id}: \t'
+            f'{self.language.title}(level_{self.language.level})\n'
+
+            f'category_id {self.category.id}: \t {self.category.title}\n'
+            f'location_id {self.location.id}: \t {self.location.address}\n'
+            f'Members:\n'
+        )
+
+        for i in self.members:
+            event_string += f'member_id {i.id}: \t {i.first_name} {i.last_name}\n'
+
+        event_string += (
+            f'created: \t{self.created}\n'
+            f'updated: \t{self.updated}\n'
+        )
+
+        return event_string     
+    
