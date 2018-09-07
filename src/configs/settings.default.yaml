@@ -1,0 +1,18 @@
+debug: &debug false
+host: localhost
+
+api:
+    host: localhost
+    port: 8000
+
+redis:
+    host: localhost
+    port: 6379
+    db:
+        cache: 0
+
+db:
+    master:
+        dsn: postgresql://postgres:postgres@localhost/postgres
+        pool_size: 23
+        max_overflow: 2
