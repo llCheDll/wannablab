@@ -1,22 +1,22 @@
-from __future__ import with_statement
 from alembic import context
-from sqlalchemy import engine_from_config
-from logging.config import fileConfig
-import os
-import sys
+from sqlalchemy import engine_from_config, pool
 
-sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), '..')))
+from config import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
+from db.models import Base
+
 config = context.config
 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
-fileConfig(config.config_file_name)
 
+# other values from the config, defined by the needs of env.py,
+# can be acquired:
+# my_important_option = config.get_main_option("my_important_option")
+# ... etc.
 
-from base import Base
+def include_object(object, name, type_, reflected, compare_to):
+    return True
 
 
 def run_migrations_offline():
@@ -31,26 +31,41 @@ def run_migrations_offline():
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
-    context.configure(
-        url=url, target_metadata=Base.metadata, literal_binds=True)
+
+    url = settings.db.get('master', {}).get('dsn')
+    context.configure(url=url, include_object=include_object)
 
     with context.begin_transaction():
         context.run_migrations()
 
 
 def run_migrations_online():
+    """Run migrations in 'online' mode.
+
+    In this scenario we need to create an Engine
+    and associate a connection with the context.
+
+    """
+
+    cnf = config.get_section(config.config_ini_section)
+    cnf["sqlalchemy.url"] = settings.db.get('master', {}).get('dsn')
+
     engine = engine_from_config(
-                config.get_section(config.config_ini_section), prefix='sqlalchemy.')
+        cnf,
+        prefix='sqlalchemy.',
+        poolclass=pool.NullPool)
+    connection = engine.connect()
+    context.configure(
+        connection=connection,
+        target_metadata=Base.metadata,
+        include_object=include_object
+    )
 
-    with engine.connect() as connection:
-        context.configure(
-                    connection=connection,
-                    target_metadata=Base.metadata
-                    )
-
+    try:
         with context.begin_transaction():
             context.run_migrations()
+    finally:
+        connection.close()
 
 
 if context.is_offline_mode():

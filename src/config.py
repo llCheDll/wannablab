@@ -2,6 +2,8 @@ import lya
 
 from pathlib import Path
 
+from alembic.config import Config
+
 PROJECT_DIR = Path(__file__).parent.as_posix()
 
 settings_default = Path(PROJECT_DIR, 'configs', 'settings.default.yaml')
@@ -33,3 +35,7 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+alembic_cfg = Config()
+alembic_cfg.set_main_option('script_location', Path(PROJECT_DIR, 'db', 'migrations').as_posix())
+alembic_cfg.set_main_option('url', settings.db.master.dsn)
