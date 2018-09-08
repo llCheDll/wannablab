@@ -4,7 +4,7 @@ import falcon
 from .constants import Status
 
 
-class Ping(object):
+class Ping:
     def on_get(self, req, resp):
         resp.set_header('Content-Type', 'application/json')
         resp.status = falcon.HTTP_200
