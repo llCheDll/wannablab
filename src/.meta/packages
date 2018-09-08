@@ -2,7 +2,6 @@ Cython==0.28.5
 falcon==1.4.1 --no-binary :all:
 flake8==3.5.0
 gunicorn==19.9.0
-httpie==0.9.9
 invoke==1.1.1
 ipdb==0.11
 ipython==6.5.0
