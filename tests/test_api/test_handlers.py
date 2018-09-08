@@ -2,7 +2,7 @@ import falcon
 from api.constants import Status
 
 
-def test_post(client):
+def test_ping(client):
     resp = client.get('/api/v1/ping')
 
     assert resp.status == falcon.HTTP_OK
