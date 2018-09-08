@@ -17,10 +17,7 @@ fileConfig(config.config_file_name)
 
 
 from base import Base
-from sqlalchemy import engine_from_config, MetaData
 
-
-target_metadata = [Base.metadata]
 
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
@@ -36,7 +33,7 @@ def run_migrations_offline():
     """
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url, target_metadata=target_metadata, literal_binds=True)
+        url=url, target_metadata=Base.metadata, literal_binds=True)
 
     with context.begin_transaction():
         context.run_migrations()
@@ -49,7 +46,7 @@ def run_migrations_online():
     with engine.connect() as connection:
         context.configure(
                     connection=connection,
-                    target_metadata=target_metadata
+                    target_metadata=Base.metadata
                     )
 
         with context.begin_transaction():
