@@ -3,3 +3,8 @@ __pycache__
 
 .idea/
 venv/
+
+.coverage
+cover/
+
+.pytest_cache

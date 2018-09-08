@@ -1,4 +1,3 @@
-import os
 import lya
 
 from pathlib import Path
@@ -31,5 +30,6 @@ class Settings(BaseSettings):
         self._settings = lya.AttrDict.from_yaml(settings_default.as_posix())
         if settings_local.exists():
             self._settings.update_yaml(settings_local.as_posix())
+
 
 settings = Settings()

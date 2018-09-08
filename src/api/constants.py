@@ -1,0 +1,2 @@
+class Status:
+    OK = 'ok'
