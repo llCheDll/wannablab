@@ -17,6 +17,8 @@ db:
         pool_size: 23
         max_overflow: 2
 
+db_autocommit: true
+
 logging:
     LoggerToFile:
         level: WARNING
