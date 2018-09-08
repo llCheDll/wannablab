@@ -1,12 +1,14 @@
 from redis import StrictRedis
+from config import settings
 from redis_lock import Lock, AlreadyAcquired
 
 
 class RedisClient:
-    connection = StrictRedis(host='localhost', port=6379, db=0)
+    def __init__(self):
+        self.connection = StrictRedis(host=settings.redis.host, port=settings.redis.port, db=0)
 
     def set(self, key, value, ex=None, px=None, nx=False, xx=False):
-        lock = Lock(self, key, expire=DEFAULT_HERD_LOCK_EXPIRE)
+        lock = Lock(self.connection, key)
 
         try:
             if lock.acquire():
