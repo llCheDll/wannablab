@@ -3,3 +3,4 @@
 coverage==4.5.1
 pytest==3.7.4
 pytest-cov==2.5.1
+pytest-falcon==0.4.2

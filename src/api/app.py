@@ -1,12 +1,13 @@
-import ujson
 import falcon
+from .handlers import (
+    Ping
+)
 
 
-class Ping(object):
-    def on_get(self, req, resp):
-        resp.status = falcon.HTTP_200
-        resp.body = ujson.dumps({'status': 'ok'})
+def configure_app(application):
+    application.add_route('/api/v1/ping/', Ping())
+
+    return application
 
 
-api = application = falcon.API()
-api.add_route('/api/v1/ping/', Ping())
+app = configure_app(falcon.API())
