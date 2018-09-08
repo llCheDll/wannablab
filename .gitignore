@@ -3,3 +3,10 @@ __pycache__
 
 .idea/
 venv/
+
+settings.local.yaml
+
+.coverage
+cover/
+
+.pytest_cache
