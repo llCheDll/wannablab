@@ -18,3 +18,10 @@ db:
         max_overflow: 2
 
 db_autocommit: true
+
+logging:
+    level: DEBUG
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    filename: log/errors.log
+    maxBytes: 1024
+    backupCount: 3

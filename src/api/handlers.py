@@ -5,7 +5,6 @@ from .constants import Status
 from .helpers import row2dict
 from db import models
 
-
 class Ping:
     def on_get(self, requset, response):
         response.set_header('Content-Type', 'application/json')
