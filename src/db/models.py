@@ -1,5 +1,6 @@
 from sqlalchemy.ext.declarative import as_declarative
 from sqlalchemy.orm import relationship, backref
+from datetime import datetime
 from sqlalchemy import (
     Column,
     String,
@@ -23,9 +24,10 @@ class_registry = {}
 
 @as_declarative(class_registry=class_registry, metadata=metadata)
 class Base:
-    created = Column(DateTime, server_default=func.now())
-    updated = Column(DateTime, onupdate=func.utc_timestamp())
-    deleted = Column(Boolean)
+    created = Column(DateTime, default=func.current_timestamp(), server_default=func.current_timestamp())
+    updated = Column(DateTime, default=func.current_timestamp(), server_default=func.current_timestamp(),
+                     onupdate=func.current_timestamp(), server_onupdate=func.current_timestamp())
+    deleted = Column(Boolean, default=False)
 
 
 user_language_association = Table('user_language', Base.metadata,
