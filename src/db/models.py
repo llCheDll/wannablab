@@ -12,9 +12,9 @@ from sqlalchemy import (
     ForeignKey,
     UniqueConstraint,
     DateTime,
-    Numeric
+    Numeric,
+    func
 )
-from sqlalchemy_utils import EmailType
 
 
 metadata = MetaData()
@@ -23,7 +23,9 @@ class_registry = {}
 
 @as_declarative(class_registry=class_registry, metadata=metadata)
 class Base:
-    pass
+    created = Column(DateTime, server_default=func.now())
+    updated = Column(DateTime, onupdate=func.utc_timestamp())
+    deleted = Column(Boolean)
 
 
 user_language_association = Table('user_language', Base.metadata,
@@ -57,9 +59,6 @@ class User(Base):
     country = Column(String)
     city = Column(String)
     rating = Column(Integer)
-    created = Column(Date, nullable=False)
-    updated = Column(Date)
-    deleted = Column(Boolean)
 
     language = relationship("Language", secondary=user_language_association)
     friends = relationship("User", secondary=friends_association_table,
@@ -73,9 +72,6 @@ class Category(Base):
     id = Column(Integer, primary_key=True)
 
     title = Column(String, nullable=False)
-    created = Column(Date, nullable=False)
-    updated = Column(Date)
-    deleted = Column(Boolean)
 
 
 class Comment(Base):
@@ -97,9 +93,6 @@ class Comment(Base):
     )
 
     text = Column(Text, nullable=False)
-    created = Column(Date, nullable=False)
-    updated = Column(Date)
-    deleted = Column(Boolean)
 
 
 event_members_association = Table(
@@ -128,9 +121,6 @@ class Event(Base):
     max_members = Column(Integer, nullable=False)
     current_num_members = Column(Integer)
 
-    created = Column(Date, nullable=False)
-    updated = Column(Date)
-
     location_id = Column(Integer, ForeignKey('location.id'))
     location = relationship("Location")
 
@@ -146,7 +136,6 @@ class Language(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
     level = Column(Integer, nullable=False)
-    created = Column(Date, nullable=False)
 
 
 class Location(Base):
@@ -158,11 +147,9 @@ class Location(Base):
     longitude = Column(Numeric)
 
     country = Column(String, nullable=False)
+    region = Column(String, nullable=False)
     city = Column(String, nullable=False)
-    address = Column(String)
-
-    created = Column(Date, nullable=False)
-    updated = Column(Date)
+    district = Column(String, nullable=False)
 
 
 class Message(Base):
@@ -177,8 +164,4 @@ class Message(Base):
 
     text = Column(Text, nullable=False)
 
-    created = Column(Date, nullable=False)
-    updated = Column(Date)
-
     received = Column(Boolean, nullable=False)
-    deleted = Column(Boolean)
