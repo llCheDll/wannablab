@@ -16,3 +16,5 @@ db:
         dsn: postgresql://postgres:postgres@localhost/postgres
         pool_size: 23
         max_overflow: 2
+
+db_autocommit: true

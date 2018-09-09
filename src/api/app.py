@@ -1,7 +1,9 @@
 import falcon
+from db.utils import init_session
 from .handlers import (
     Ping
 )
+from .middlewares import DatabaseSessionManagerMiddleware
 
 
 def configure_app(application):
@@ -10,4 +12,5 @@ def configure_app(application):
     return application
 
 
-app = configure_app(falcon.API())
+session = init_session()
+app = configure_app(falcon.API(middleware=[DatabaseSessionManagerMiddleware(session)]))
