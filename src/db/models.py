@@ -1,6 +1,5 @@
 from sqlalchemy.ext.declarative import as_declarative
 from sqlalchemy.orm import relationship, backref
-from datetime import datetime
 from sqlalchemy import (
     Column,
     String,
@@ -30,16 +29,19 @@ class Base:
     deleted = Column(Boolean, default=False)
 
 
-user_language_association = Table('user_language', Base.metadata,
-                                  Column('user_id', Integer, ForeignKey('user.id')),
-                                  Column('language_id', Integer, ForeignKey('language.id'))
-                                  )
+user_language_association = Table(
+    'user_language', Base.metadata,
+    Column('user_id', Integer, ForeignKey('user.id')),
+    Column('language_id', Integer, ForeignKey('language.id'))
+)
 
-friends_association_table = Table('friends', Base.metadata,
-                                  Column('first_user', Integer, ForeignKey('user.id'), primary_key=True),
-                                  Column('second_user', Integer, ForeignKey('user.id'), primary_key=True),
-                                  UniqueConstraint('first_user', 'second_user', name='unique_friendships')
-                                  )
+
+friends_association_table = Table(
+    'friends', Base.metadata,
+    Column('first_user', Integer, ForeignKey('user.id'), primary_key=True),
+    Column('second_user', Integer, ForeignKey('user.id'), primary_key=True),
+    UniqueConstraint('first_user', 'second_user', name='unique_friendships')
+)
 
 
 class User(Base):
@@ -62,8 +64,8 @@ class User(Base):
     city = Column(String)
     rating = Column(Integer)
 
-    language = relationship("Language", secondary=user_language_association)
-    friends = relationship("User", secondary=friends_association_table,
+    language = relationship('Language', secondary=user_language_association)
+    friends = relationship('User', secondary=friends_association_table,
                            primaryjoin=id == friends_association_table.c.first_user,
                            secondaryjoin=id == friends_association_table.c.second_user)
 
@@ -84,14 +86,14 @@ class Comment(Base):
     author_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     recipient_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     author = relationship(
-        "User",
+        'User',
         foreign_keys=[author_id],
-        backref=backref("author_comments")
+        backref=backref('author_comments')
     )
     recipient = relationship(
-        "User",
+        'User',
         foreign_keys=[recipient_id],
-        backref=backref("recipient_comments")
+        backref=backref('recipient_comments')
     )
 
     text = Column(Text, nullable=False)
@@ -110,13 +112,13 @@ class Event(Base):
     id = Column(Integer, primary_key=True)
 
     author_id = Column(Integer, ForeignKey('user.id'))
-    event_author = relationship("User")
+    event_author = relationship('User')
 
     topic = Column(String)
     description = Column(Text)
 
     language_id = Column(Integer, ForeignKey('language.id'))
-    language = relationship("Language")
+    language = relationship('Language')
 
     date = Column(DateTime, nullable=False)
 
@@ -124,12 +126,12 @@ class Event(Base):
     current_num_members = Column(Integer)
 
     location_id = Column(Integer, ForeignKey('location.id'))
-    location = relationship("Location")
+    location = relationship('Location')
 
-    members = relationship("User", secondary=event_members_association)
+    members = relationship('User', secondary=event_members_association)
 
     category_id = Column(Integer, ForeignKey('category.id'))
-    category = relationship("Category")
+    category = relationship('Category')
 
 
 class Language(Base):
@@ -140,24 +142,14 @@ class Language(Base):
     level = Column(Integer, nullable=False)
 
 
-class Location(Base):
-    __tablename__ = 'location'
-
-    id = Column(Integer, primary_key=True)
-
-    latitude = Column(Numeric)
-    longitude = Column(Numeric)
-    country = relationship("Country", backref="location")
-    region = relationship("Country", backref="location")
-    city = relationship("Country", backref="location")
-    district = relationship("Country", backref="location")
-
-
 class Country(Base):
     __tablename__ = 'country'
 
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
+
+    locations = relationship('Location')
+    regions = relationship('Region')
 
 
 class Region(Base):
@@ -166,6 +158,12 @@ class Region(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
 
+    country_id = Column(Integer, ForeignKey('country.id'))
+
+    locations = relationship('Location')
+    country = relationship('Country')
+    cities = relationship('City')
+
 
 class City(Base):
     __tablename__ = 'city'
@@ -173,12 +171,44 @@ class City(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
 
+    region_id = Column(Integer, ForeignKey('region.id'))
+
+    locations = relationship('Location')
+    region = relationship('Region')
+    districts = relationship('District')
+
 
 class District(Base):
     __tablename__ = 'district'
 
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
+
+    city_id = Column(Integer, ForeignKey('city.id'))
+
+    locations = relationship('Location')
+    city = relationship('City')
+
+
+class Location(Base):
+    __tablename__ = 'location'
+
+    id = Column(Integer, primary_key=True)
+
+    latitude = Column(Numeric)
+    longitude = Column(Numeric)
+
+    address = Column(String, nullable=False)
+
+    country_id = Column(Integer, ForeignKey('country.id'))
+    region_id = Column(Integer, ForeignKey('region.id'))
+    city_id = Column(Integer, ForeignKey('city.id'))
+    district_id = Column(Integer, ForeignKey('district.id'))
+
+    country = relationship('Country')
+    region = relationship('Region')
+    city = relationship('City')
+    district = relationship('District')
 
 
 class Message(Base):
@@ -188,8 +218,8 @@ class Message(Base):
 
     author_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     recipient_id = Column(Integer, ForeignKey('user.id'), nullable=False)
-    author = relationship("User", foreign_keys=[author_id])
-    recipient = relationship("User", foreign_keys=[recipient_id])
+    author = relationship('User', foreign_keys=[author_id])
+    recipient = relationship('User', foreign_keys=[recipient_id])
 
     text = Column(Text, nullable=False)
 
