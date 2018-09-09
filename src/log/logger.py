@@ -5,7 +5,7 @@ import sys
 from config import settings
 
 
-class Logger():
+class Logger:
     def __init__(self, name='logger'):
         self.logger = logging.getLogger(name)
         self.logger.setLevel(settings.logging.level)
