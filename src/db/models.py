@@ -147,11 +147,38 @@ class Location(Base):
 
     latitude = Column(Numeric)
     longitude = Column(Numeric)
+    country = relationship("Country", backref="location")
+    region = relationship("Country", backref="location")
+    city = relationship("Country", backref="location")
+    district = relationship("Country", backref="location")
 
-    country = Column(String, nullable=False)
-    region = Column(String, nullable=False)
-    city = Column(String, nullable=False)
-    district = Column(String, nullable=False)
+
+class Country(Base):
+    __tablename__ = 'country'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String, nullable=False)
+
+
+class Region(Base):
+    __tablename__ = 'region'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String, nullable=False)
+
+
+class City(Base):
+    __tablename__ = 'city'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String, nullable=False)
+
+
+class District(Base):
+    __tablename__ = 'district'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String, nullable=False)
 
 
 class Message(Base):
