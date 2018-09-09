@@ -1,5 +1,6 @@
 from sqlalchemy.ext.declarative import as_declarative
 from sqlalchemy.orm import relationship, backref
+from datetime import datetime
 from sqlalchemy import (
     Column,
     String,
@@ -12,9 +13,9 @@ from sqlalchemy import (
     ForeignKey,
     UniqueConstraint,
     DateTime,
-    Numeric
+    Numeric,
+    func
 )
-from sqlalchemy_utils import EmailType
 
 
 metadata = MetaData()
@@ -23,7 +24,10 @@ class_registry = {}
 
 @as_declarative(class_registry=class_registry, metadata=metadata)
 class Base:
-    pass
+    created = Column(DateTime, default=func.current_timestamp(), server_default=func.current_timestamp())
+    updated = Column(DateTime, default=func.current_timestamp(), server_default=func.current_timestamp(),
+                     onupdate=func.current_timestamp(), server_onupdate=func.current_timestamp())
+    deleted = Column(Boolean, default=False)
 
 
 user_language_association = Table('user_language', Base.metadata,
@@ -49,7 +53,7 @@ class User(Base):
     info = Column(Text)
     photo = Column(Integer)
     phone = Column(String)
-    email = Column(EmailType, nullable=False, unique=True)
+    email = Column(String, nullable=False, unique=True)
     facebook = Column(String, unique=True)
     instagram = Column(String, unique=True)
     twitter = Column(String, unique=True)
@@ -57,9 +61,6 @@ class User(Base):
     country = Column(String)
     city = Column(String)
     rating = Column(Integer)
-    created = Column(Date, nullable=False)
-    updated = Column(Date)
-    deleted = Column(Boolean)
 
     language = relationship("Language", secondary=user_language_association)
     friends = relationship("User", secondary=friends_association_table,
@@ -73,9 +74,6 @@ class Category(Base):
     id = Column(Integer, primary_key=True)
 
     title = Column(String, nullable=False)
-    created = Column(Date, nullable=False)
-    updated = Column(Date)
-    deleted = Column(Boolean)
 
 
 class Comment(Base):
@@ -97,9 +95,6 @@ class Comment(Base):
     )
 
     text = Column(Text, nullable=False)
-    created = Column(Date, nullable=False)
-    updated = Column(Date)
-    deleted = Column(Boolean)
 
 
 event_members_association = Table(
@@ -128,9 +123,6 @@ class Event(Base):
     max_members = Column(Integer, nullable=False)
     current_num_members = Column(Integer)
 
-    created = Column(Date, nullable=False)
-    updated = Column(Date)
-
     location_id = Column(Integer, ForeignKey('location.id'))
     location = relationship("Location")
 
@@ -146,7 +138,6 @@ class Language(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
     level = Column(Integer, nullable=False)
-    created = Column(Date, nullable=False)
 
 
 class Location(Base):
@@ -156,13 +147,38 @@ class Location(Base):
 
     latitude = Column(Numeric)
     longitude = Column(Numeric)
+    country = relationship("Country", backref="location")
+    region = relationship("Country", backref="location")
+    city = relationship("Country", backref="location")
+    district = relationship("Country", backref="location")
 
-    country = Column(String, nullable=False)
-    city = Column(String, nullable=False)
-    address = Column(String)
 
-    created = Column(Date, nullable=False)
-    updated = Column(Date)
+class Country(Base):
+    __tablename__ = 'country'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String, nullable=False)
+
+
+class Region(Base):
+    __tablename__ = 'region'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String, nullable=False)
+
+
+class City(Base):
+    __tablename__ = 'city'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String, nullable=False)
+
+
+class District(Base):
+    __tablename__ = 'district'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String, nullable=False)
 
 
 class Message(Base):
@@ -177,8 +193,4 @@ class Message(Base):
 
     text = Column(Text, nullable=False)
 
-    created = Column(Date, nullable=False)
-    updated = Column(Date)
-
     received = Column(Boolean, nullable=False)
-    deleted = Column(Boolean)
