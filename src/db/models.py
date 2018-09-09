@@ -49,7 +49,7 @@ class User(Base):
     info = Column(Text)
     photo = Column(Integer)
     phone = Column(String)
-    email = Column(EmailType, nullable=False, unique=True)
+    email = Column(String, nullable=False, unique=True)
     facebook = Column(String, unique=True)
     instagram = Column(String, unique=True)
     twitter = Column(String, unique=True)
