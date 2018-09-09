@@ -178,7 +178,8 @@ def downgrade():
     op.drop_table('friends')
     op.drop_table('event')
     op.drop_table('comment')
-    op.drop_table('user')
+    op.dro
+    p_table('user')
     op.drop_table('region')
     op.drop_table('location')
     op.drop_table('language')
