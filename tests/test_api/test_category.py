@@ -14,7 +14,7 @@ def test_categories(session, client):
     session.add_all(categories)
     session.commit()
 
-    resp = client.get('/api/v1/category/')
+    resp = client.get('/api/v1/category/', as_response=True)
 
     assert resp.status == falcon.HTTP_OK
     assert resp.json['status'] == Status.OK
