@@ -1,8 +1,8 @@
 """
 
-Revision ID: e9d55ec777d8
+Revision ID: b4463dfd8c77
 Revises: 
-Create Date: 2018-09-09 18:22:20.435322
+Create Date: 2018-09-09 19:57:20.890268
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'e9d55ec777d8'
+revision = 'b4463dfd8c77'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -26,23 +26,7 @@ def upgrade():
     sa.Column('title', sa.String(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('city',
-    sa.Column('created', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
-    sa.Column('updated', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
-    sa.Column('deleted', sa.Boolean(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('title', sa.String(), nullable=False),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('country',
-    sa.Column('created', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
-    sa.Column('updated', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
-    sa.Column('deleted', sa.Boolean(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('title', sa.String(), nullable=False),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('district',
     sa.Column('created', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.Column('updated', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.Column('deleted', sa.Boolean(), nullable=True),
@@ -57,23 +41,6 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(), nullable=False),
     sa.Column('level', sa.Integer(), nullable=False),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('location',
-    sa.Column('created', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
-    sa.Column('updated', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
-    sa.Column('deleted', sa.Boolean(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('latitude', sa.Numeric(), nullable=True),
-    sa.Column('longitude', sa.Numeric(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('region',
-    sa.Column('created', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
-    sa.Column('updated', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
-    sa.Column('deleted', sa.Boolean(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('title', sa.String(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('user',
@@ -114,26 +81,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['recipient_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('event',
-    sa.Column('created', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
-    sa.Column('updated', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
-    sa.Column('deleted', sa.Boolean(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('author_id', sa.Integer(), nullable=True),
-    sa.Column('topic', sa.String(), nullable=True),
-    sa.Column('description', sa.Text(), nullable=True),
-    sa.Column('language_id', sa.Integer(), nullable=True),
-    sa.Column('date', sa.DateTime(), nullable=False),
-    sa.Column('max_members', sa.Integer(), nullable=False),
-    sa.Column('current_num_members', sa.Integer(), nullable=True),
-    sa.Column('location_id', sa.Integer(), nullable=True),
-    sa.Column('category_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['author_id'], ['user.id'], ),
-    sa.ForeignKeyConstraint(['category_id'], ['category.id'], ),
-    sa.ForeignKeyConstraint(['language_id'], ['language.id'], ),
-    sa.ForeignKeyConstraint(['location_id'], ['location.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('friends',
     sa.Column('first_user', sa.Integer(), nullable=False),
     sa.Column('second_user', sa.Integer(), nullable=False),
@@ -155,11 +102,79 @@ def upgrade():
     sa.ForeignKeyConstraint(['recipient_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('region',
+    sa.Column('created', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+    sa.Column('updated', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+    sa.Column('deleted', sa.Boolean(), nullable=True),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('title', sa.String(), nullable=False),
+    sa.Column('country_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['country_id'], ['country.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('user_language',
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('language_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['language_id'], ['language.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], )
+    )
+    op.create_table('city',
+    sa.Column('created', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+    sa.Column('updated', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+    sa.Column('deleted', sa.Boolean(), nullable=True),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('title', sa.String(), nullable=False),
+    sa.Column('region_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['region_id'], ['region.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('district',
+    sa.Column('created', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+    sa.Column('updated', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+    sa.Column('deleted', sa.Boolean(), nullable=True),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('title', sa.String(), nullable=False),
+    sa.Column('city_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['city_id'], ['city.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('location',
+    sa.Column('created', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+    sa.Column('updated', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+    sa.Column('deleted', sa.Boolean(), nullable=True),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('latitude', sa.Numeric(), nullable=True),
+    sa.Column('longitude', sa.Numeric(), nullable=True),
+    sa.Column('address', sa.String(), nullable=False),
+    sa.Column('country_id', sa.Integer(), nullable=True),
+    sa.Column('region_id', sa.Integer(), nullable=True),
+    sa.Column('city_id', sa.Integer(), nullable=True),
+    sa.Column('district_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['city_id'], ['city.id'], ),
+    sa.ForeignKeyConstraint(['country_id'], ['country.id'], ),
+    sa.ForeignKeyConstraint(['district_id'], ['district.id'], ),
+    sa.ForeignKeyConstraint(['region_id'], ['region.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('event',
+    sa.Column('created', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+    sa.Column('updated', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+    sa.Column('deleted', sa.Boolean(), nullable=True),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('author_id', sa.Integer(), nullable=True),
+    sa.Column('topic', sa.String(), nullable=True),
+    sa.Column('description', sa.Text(), nullable=True),
+    sa.Column('language_id', sa.Integer(), nullable=True),
+    sa.Column('date', sa.DateTime(), nullable=False),
+    sa.Column('max_members', sa.Integer(), nullable=False),
+    sa.Column('current_num_members', sa.Integer(), nullable=True),
+    sa.Column('location_id', sa.Integer(), nullable=True),
+    sa.Column('category_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['author_id'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['category_id'], ['category.id'], ),
+    sa.ForeignKeyConstraint(['language_id'], ['language.id'], ),
+    sa.ForeignKeyConstraint(['location_id'], ['location.id'], ),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('event_members',
     sa.Column('event_id', sa.Integer(), nullable=True),
@@ -173,18 +188,17 @@ def upgrade():
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('event_members')
+    op.drop_table('event')
+    op.drop_table('location')
+    op.drop_table('district')
+    op.drop_table('city')
     op.drop_table('user_language')
+    op.drop_table('region')
     op.drop_table('message')
     op.drop_table('friends')
-    op.drop_table('event')
     op.drop_table('comment')
-    op.dro
-    p_table('user')
-    op.drop_table('region')
-    op.drop_table('location')
+    op.drop_table('user')
     op.drop_table('language')
-    op.drop_table('district')
     op.drop_table('country')
-    op.drop_table('city')
     op.drop_table('category')
     # ### end Alembic commands ###
