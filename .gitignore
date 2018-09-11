@@ -10,3 +10,5 @@ settings.local.yaml
 cover/
 
 .pytest_cache
+
+*.log

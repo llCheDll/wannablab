@@ -12,9 +12,9 @@ from sqlalchemy import (
     ForeignKey,
     UniqueConstraint,
     DateTime,
-    Numeric
+    Numeric,
+    func
 )
-from sqlalchemy_utils import EmailType
 
 
 metadata = MetaData()
@@ -23,19 +23,25 @@ class_registry = {}
 
 @as_declarative(class_registry=class_registry, metadata=metadata)
 class Base:
-    pass
+    created = Column(DateTime, default=func.current_timestamp(), server_default=func.current_timestamp())
+    updated = Column(DateTime, default=func.current_timestamp(), server_default=func.current_timestamp(),
+                     onupdate=func.current_timestamp(), server_onupdate=func.current_timestamp())
+    deleted = Column(Boolean, default=False)
 
 
-user_language_association = Table('user_language', Base.metadata,
-                                  Column('user_id', Integer, ForeignKey('user.id')),
-                                  Column('language_id', Integer, ForeignKey('language.id'))
-                                  )
+user_language_association = Table(
+    'user_language', Base.metadata,
+    Column('user_id', Integer, ForeignKey('user.id')),
+    Column('language_id', Integer, ForeignKey('language.id'))
+)
 
-friends_association_table = Table('friends', Base.metadata,
-                                  Column('first_user', Integer, ForeignKey('user.id'), primary_key=True),
-                                  Column('second_user', Integer, ForeignKey('user.id'), primary_key=True),
-                                  UniqueConstraint('first_user', 'second_user', name='unique_friendships')
-                                  )
+
+friends_association_table = Table(
+    'friends', Base.metadata,
+    Column('first_user', Integer, ForeignKey('user.id'), primary_key=True),
+    Column('second_user', Integer, ForeignKey('user.id'), primary_key=True),
+    UniqueConstraint('first_user', 'second_user', name='unique_friendships')
+)
 
 
 class User(Base):
@@ -49,7 +55,7 @@ class User(Base):
     info = Column(Text)
     photo = Column(Integer)
     phone = Column(String)
-    email = Column(EmailType, nullable=False, unique=True)
+    email = Column(String, nullable=False, unique=True)
     facebook = Column(String, unique=True)
     instagram = Column(String, unique=True)
     twitter = Column(String, unique=True)
@@ -57,12 +63,9 @@ class User(Base):
     country = Column(String)
     city = Column(String)
     rating = Column(Integer)
-    created = Column(Date, nullable=False)
-    updated = Column(Date)
-    deleted = Column(Boolean)
 
-    language = relationship("Language", secondary=user_language_association)
-    friends = relationship("User", secondary=friends_association_table,
+    language = relationship('Language', secondary=user_language_association)
+    friends = relationship('User', secondary=friends_association_table,
                            primaryjoin=id == friends_association_table.c.first_user,
                            secondaryjoin=id == friends_association_table.c.second_user)
 
@@ -73,9 +76,6 @@ class Category(Base):
     id = Column(Integer, primary_key=True)
 
     title = Column(String, nullable=False)
-    created = Column(Date, nullable=False)
-    updated = Column(Date)
-    deleted = Column(Boolean)
 
 
 class Comment(Base):
@@ -86,20 +86,17 @@ class Comment(Base):
     author_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     recipient_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     author = relationship(
-        "User",
+        'User',
         foreign_keys=[author_id],
-        backref=backref("author_comments")
+        backref=backref('author_comments')
     )
     recipient = relationship(
-        "User",
+        'User',
         foreign_keys=[recipient_id],
-        backref=backref("recipient_comments")
+        backref=backref('recipient_comments')
     )
 
     text = Column(Text, nullable=False)
-    created = Column(Date, nullable=False)
-    updated = Column(Date)
-    deleted = Column(Boolean)
 
 
 event_members_association = Table(
@@ -115,29 +112,26 @@ class Event(Base):
     id = Column(Integer, primary_key=True)
 
     author_id = Column(Integer, ForeignKey('user.id'))
-    event_author = relationship("User")
+    event_author = relationship('User')
 
     topic = Column(String)
     description = Column(Text)
 
     language_id = Column(Integer, ForeignKey('language.id'))
-    language = relationship("Language")
+    language = relationship('Language')
 
     date = Column(DateTime, nullable=False)
 
     max_members = Column(Integer, nullable=False)
     current_num_members = Column(Integer)
 
-    created = Column(Date, nullable=False)
-    updated = Column(Date)
-
     location_id = Column(Integer, ForeignKey('location.id'))
-    location = relationship("Location")
+    location = relationship('Location')
 
-    members = relationship("User", secondary=event_members_association)
+    members = relationship('User', secondary=event_members_association)
 
     category_id = Column(Integer, ForeignKey('category.id'))
-    category = relationship("Category")
+    category = relationship('Category')
 
 
 class Language(Base):
@@ -146,7 +140,54 @@ class Language(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
     level = Column(Integer, nullable=False)
-    created = Column(Date, nullable=False)
+
+
+class Country(Base):
+    __tablename__ = 'country'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String, nullable=False)
+
+    locations = relationship('Location')
+    regions = relationship('Region')
+
+
+class Region(Base):
+    __tablename__ = 'region'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String, nullable=False)
+
+    country_id = Column(Integer, ForeignKey('country.id'))
+
+    locations = relationship('Location')
+    country = relationship('Country')
+    cities = relationship('City')
+
+
+class City(Base):
+    __tablename__ = 'city'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String, nullable=False)
+
+    region_id = Column(Integer, ForeignKey('region.id'))
+
+    locations = relationship('Location')
+    region = relationship('Region')
+    districts = relationship('District')
+
+
+class District(Base):
+    __tablename__ = 'district'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String, nullable=False)
+
+    city_id = Column(Integer, ForeignKey('city.id'))
+
+    locations = relationship('Location')
+    city = relationship('City')
 
 
 class Location(Base):
@@ -157,12 +198,17 @@ class Location(Base):
     latitude = Column(Numeric)
     longitude = Column(Numeric)
 
-    country = Column(String, nullable=False)
-    city = Column(String, nullable=False)
-    address = Column(String)
+    address = Column(String, nullable=False)
 
-    created = Column(Date, nullable=False)
-    updated = Column(Date)
+    country_id = Column(Integer, ForeignKey('country.id'))
+    region_id = Column(Integer, ForeignKey('region.id'))
+    city_id = Column(Integer, ForeignKey('city.id'))
+    district_id = Column(Integer, ForeignKey('district.id'))
+
+    country = relationship('Country')
+    region = relationship('Region')
+    city = relationship('City')
+    district = relationship('District')
 
 
 class Message(Base):
@@ -172,13 +218,9 @@ class Message(Base):
 
     author_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     recipient_id = Column(Integer, ForeignKey('user.id'), nullable=False)
-    author = relationship("User", foreign_keys=[author_id])
-    recipient = relationship("User", foreign_keys=[recipient_id])
+    author = relationship('User', foreign_keys=[author_id])
+    recipient = relationship('User', foreign_keys=[recipient_id])
 
     text = Column(Text, nullable=False)
 
-    created = Column(Date, nullable=False)
-    updated = Column(Date)
-
     received = Column(Boolean, nullable=False)
-    deleted = Column(Boolean)
