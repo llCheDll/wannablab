@@ -4,6 +4,11 @@ from db.utils import init_session
 
 
 @pytest.fixture
+def api():
+    return application
+
+
+@pytest.fixture
 def app():
     return application
 

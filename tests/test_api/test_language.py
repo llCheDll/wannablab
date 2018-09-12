@@ -13,7 +13,7 @@ def test_languages(session, client):
     session.add_all(languages)
     session.commit()
 
-    resp = client.get('/api/v1/language/')
+    resp = client.get('/api/v1/language/', as_response=True)
 
     assert resp.status == falcon.HTTP_OK
     assert resp.json['status'] == Status.OK

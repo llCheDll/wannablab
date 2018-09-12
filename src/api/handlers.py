@@ -36,3 +36,19 @@ class Category(Items):
 
 class Language(Items):
     model = models.Language
+
+
+class Country(Items):
+    model = models.Country
+
+
+class City(Items):
+    model = models.City
+
+
+class Region(Items):
+    model = models.Region
+
+
+class District(Items):
+    model = models.District

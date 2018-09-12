@@ -1,6 +1,10 @@
 import falcon
 from db.utils import init_session
 from .handlers import (
+    Region,
+    Country,
+    City,
+    District,
     Language,
     Category,
     Ping
@@ -12,6 +16,10 @@ def configure_app(application):
     application.add_route('/api/v1/ping/', Ping())
     application.add_route('/api/v1/category/', Category())
     application.add_route('/api/v1/language/', Language())
+    application.add_route('/api/v1/country/', Country())
+    application.add_route('/api/v1/city/', City())
+    application.add_route('/api/v1/region/', Region())
+    application.add_route('/api/v1/district/', District())
 
     return application
 
