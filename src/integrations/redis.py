@@ -5,7 +5,11 @@ from redis_lock import Lock, AlreadyAcquired
 
 class RedisClient:
     def __init__(self):
-        self.connection = StrictRedis(host=settings.redis.host, port=settings.redis.port, db=0)
+        self._connection = StrictRedis(host=settings.redis.host,
+                                       port=settings.redis.port,
+                                       db=0,
+                                       decode_responses=True
+                                       )
 
     def set(self, name, value, ex=None, px=None, nx=False, xx=False):
         """
@@ -22,11 +26,11 @@ class RedisClient:
                     ``name`` to ``value`` only if it already exists.
         :return: True if it set`s.
         """
-        lock = Lock(self.connection, name)
+        lock = Lock(self._connection, name)
 
         try:
             if lock.acquire():
-                result = self.connection.set(name, value, ex=ex, px=px, nx=nx, xx=xx)
+                result = self._connection.set(name, value, ex=ex, px=px, nx=nx, xx=xx)
 
                 lock.release()
                 return result
@@ -42,11 +46,11 @@ class RedisClient:
         :param value: value
         :return: The old value at key ``name``.
         """
-        lock = Lock(self.connection, name)
+        lock = Lock(self._connection, name)
 
         try:
             if lock.acquire():
-                result = self.connection.getset(name, value)
+                result = self._connection.getset(name, value)
                 lock.release()
 
                 return result
@@ -63,11 +67,11 @@ class RedisClient:
         :param kwargs: key=value
         :return: True if it set`s
         """
-        lock = Lock(self.connection, name)
+        lock = Lock(self._connection, name)
 
         try:
             if lock.acquire():
-                result = self.connection.hmset(name, kwargs)
+                result = self._connection.hmset(name, kwargs)
 
                 lock.release()
                 return result
@@ -87,11 +91,11 @@ class RedisClient:
             >>redis_client.zset('sorted_set', 42, 'arg1', 42.0, 'arg2')
             >>2
         """
-        lock = Lock(self.connection, name)
+        lock = Lock(self._connection, name)
 
         try:
             if lock.acquire():
-                result = self.connection.execute_command('ZADD', name, *args)
+                result = self._connection.execute_command('ZADD', name, *args)
 
                 lock.release()
                 return result
@@ -105,7 +109,7 @@ class RedisClient:
         :param keys: List of keys
         :return: List of values
         """
-        with self.connection.pipeline(transaction=False) as pipe:
+        with self._connection.pipeline(transaction=False) as pipe:
             for key in keys:
                 pipe.get(key)
             return pipe.execute()
@@ -117,7 +121,7 @@ class RedisClient:
         :param args: List of keys
         :return: List of values
         """
-        with self.connection.pipeline(transaction=False) as pipe:
+        with self._connection.pipeline(transaction=False) as pipe:
             pipe.hmget(name, args)
             return pipe.execute()
 
@@ -138,7 +142,7 @@ class RedisClient:
         :param score_cast_func: A callable used to cast the score return value
         :return: List of members or list of pairs (member, score)
         """
-        with self.connection.pipeline(transaction=False) as pipe:
+        with self._connection.pipeline(transaction=False) as pipe:
             pipe.zrange(
                 name=name, start=start,
                 end=end, desc=desc,
