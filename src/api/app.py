@@ -17,9 +17,10 @@ def configure_app(application):
     application.add_route('/api/v1/category/', Category())
     application.add_route('/api/v1/language/', Language())
     application.add_route('/api/v1/country/', Country())
-    application.add_route('/api/v1/{country_id}/region/', Region())
-    application.add_route('/api/v1/{country_id}/city/', City())
-    # application.add_route('/api/v1/{city_id}/district/', District())
+    application.add_route('/api/v1/country/{country_id}/region/', Region())
+    application.add_route('/api/v1/region/{region_id}/city/', City())
+    application.add_route('/api/v1/country/{country_id}/city/', City())
+    application.add_route('/api/v1/city/{city_id}/district/', District())
 
     return application
 

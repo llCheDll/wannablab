@@ -69,12 +69,12 @@ class Region:
 
 
 class City:
-    def on_get(self, request, response, country_id):
+    def on_get(self, request, response, country_id=None, region_id=None):
 
         try:
             session = request.context['session']
-            cities = session.query(models.City).join(models.Region).filter(
-                models.Region.country_id == country_id)
+            cities = session.query(models.City).filter(
+                models.City.country_id == country_id).filter(models.City.region_id == region_id)
 
             response.set_header('Content-Type', 'application/json')
             response.status = falcon.HTTP_200
