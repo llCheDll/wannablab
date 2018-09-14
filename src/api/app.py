@@ -7,7 +7,10 @@ from .handlers import (
     District,
     Language,
     Category,
-    Ping
+    Ping,
+    MessageAll,
+    MessageSent,
+    MessageReceived,
 )
 from .middlewares import DatabaseSessionManagerMiddleware
 
@@ -20,6 +23,18 @@ def configure_app(application):
     application.add_route('/api/v1/city/', City())
     application.add_route('/api/v1/region/', Region())
     application.add_route('/api/v1/district/', District())
+    application.add_route(
+        '/api/v1/user/{user_id}/message/all/',
+        MessageAll()
+    )
+    application.add_route(
+        '/api/v1/user/{user_id}/message/sent/',
+        MessageSent()
+    )
+    application.add_route(
+        '/api/v1/user/{user_id}/message/received/',
+        MessageReceived()
+    )
 
     return application
 
