@@ -1,7 +1,6 @@
 import ujson
 import falcon
 
-from sqlalchemy.orm.exc import NoResultFound
 from .constants import Status
 from .helpers import row2dict
 from db import models
@@ -17,18 +16,30 @@ class Ping:
 class Items:
     model = None
 
-    def on_get(self, request, response):
+    def on_get(self, request, response, **kwargs):
         session = request.context['session']
         items = session.query(self.model).all()
 
+        self.response_to_json(response, items)
+
+    def response_to_json(self, response, items):
         response.set_header('Content-Type', 'application/json')
         response.status = falcon.HTTP_200
-        response.body = ujson.dumps(
-            {
-                'status': Status.OK,
-                'data': [row2dict(item) for item in items]
-            }
-        )
+        result = [row2dict(item) for item in items]
+        if len(result) != 0:
+            response.body = ujson.dumps(
+                {
+                    'status': Status.OK,
+                    'data': result
+                }
+            )
+        else:
+            response.status = falcon.HTTP_404
+            response.body = ujson.dumps(
+                {
+                    'status': Status.NotFound,
+                }
+            )
 
 
 class Category(Items):
@@ -43,76 +54,33 @@ class Country(Items):
     model = models.Country
 
 
-class Region:
-    def on_get(self, request, response, country_id):
+class Region(Items):
+    def on_get(self, request, response, **kwargs):
+        country_id = kwargs.get('country_id')
 
-        try:
-            session = request.context['session']
-            regions = session.query(models.Region).filter(
-                models.Region.country_id == country_id).all()
+        session = request.context['session']
+        regions = session.query(models.Region).filter(models.Region.country_id == country_id).all()
 
-            response.set_header('Content-Type', 'application/json')
-            response.status = falcon.HTTP_200
-            response.body = ujson.dumps(
-                {
-                    'status': Status.OK,
-                    'data': [row2dict(region) for region in regions]
-                }
-            )
-        except NoResultFound:
-            response.status = falcon.HTTP_404
-            response.body = ujson.dumps(
-                {
-                    'status': Status.NotFound,
-                }
-            )
+        self.response_to_json(response, regions)
 
 
-class City:
-    def on_get(self, request, response, country_id=None, region_id=None):
+class City(Items):
+    def on_get(self, request, response, **kwargs):
+        country_id = kwargs.get('country_id')
+        region_id = kwargs.get('region_id')
 
-        try:
-            session = request.context['session']
-            cities = session.query(models.City).filter(
-                models.City.country_id == country_id).filter(models.City.region_id == region_id)
+        session = request.context['session']
+        cities = session.query(models.City).filter(
+            models.City.country_id == country_id).filter(models.City.region_id == region_id)
 
-            response.set_header('Content-Type', 'application/json')
-            response.status = falcon.HTTP_200
-            response.body = ujson.dumps(
-                {
-                    'status': Status.OK,
-                    'data': [row2dict(city) for city in cities]
-                }
-            )
-        except NoResultFound:
-            response.status = falcon.HTTP_404
-            response.body = ujson.dumps(
-                {
-                    'status': Status.NotFound,
-                }
-            )
+        self.response_to_json(response, cities)
 
 
-class District:
-    def on_get(self, request, response, city_id):
+class District(Items):
+    def on_get(self, request, response, **kwargs):
+        city_id = kwargs.get('city_id')
 
-        try:
-            session = request.context['session']
-            districts = session.query(models.District).filter(
-                models.District.city_id == city_id).all()
+        session = request.context['session']
+        districts = session.query(models.District).filter(models.District.city_id == city_id).all()
 
-            response.set_header('Content-Type', 'application/json')
-            response.status = falcon.HTTP_200
-            response.body = ujson.dumps(
-                {
-                    'status': Status.OK,
-                    'data': [row2dict(district) for district in districts]
-                }
-            )
-        except NoResultFound:
-            response.status = falcon.HTTP_404
-            response.body = ujson.dumps(
-                {
-                    'status': Status.NotFound,
-                }
-            )
+        self.response_to_json(response, districts)
