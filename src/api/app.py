@@ -20,17 +20,12 @@ def configure_app(application):
     application.add_route('/api/v1/category/', Category())
     application.add_route('/api/v1/language/', Language())
     application.add_route('/api/v1/country/', Country())
-    application.add_route('/api/v1/city/', City())
-    application.add_route('/api/v1/region/', Region())
-    application.add_route('/api/v1/district/', District())
-    application.add_route(
-        '/api/v1/user/{user_id}/message/all/',
-        MessageAll()
-    )
-    application.add_route(
-        '/api/v1/user/{user_id}/message/sent/',
-        MessageSent()
-    )
+    application.add_route('/api/v1/country/{country_id}/region/', Region())
+    application.add_route('/api/v1/region/{region_id}/city/', City())
+    application.add_route('/api/v1/country/{country_id}/city/', City())
+    application.add_route('/api/v1/city/{city_id}/district/', District())
+    application.add_route('/api/v1/user/{user_id}/message/all/', MessageAll())
+    application.add_route('/api/v1/user/{user_id}/message/sent/', MessageSent())
     application.add_route(
         '/api/v1/user/{user_id}/message/received/',
         MessageReceived()

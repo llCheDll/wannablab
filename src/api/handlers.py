@@ -53,16 +53,36 @@ class Country(Items):
     model = models.Country
 
 
-class City(Items):
-    model = models.City
-
-
 class Region(Items):
-    model = models.Region
+    def on_get(self, request, response, **kwargs):
+        country_id = kwargs.get('country_id')
+
+        session = request.context['session']
+        regions = session.query(models.Region).filter(models.Region.country_id == country_id).all()
+
+        self.response_to_json(response, regions)
+
+
+class City(Items):
+    def on_get(self, request, response, **kwargs):
+        country_id = kwargs.get('country_id')
+        region_id = kwargs.get('region_id')
+
+        session = request.context['session']
+        cities = session.query(models.City).filter(
+            models.City.country_id == country_id).filter(models.City.region_id == region_id)
+
+        self.response_to_json(response, cities)
 
 
 class District(Items):
-    model = models.District
+    def on_get(self, request, response, **kwargs):
+        city_id = kwargs.get('city_id')
+
+        session = request.context['session']
+        districts = session.query(models.District).filter(models.District.city_id == city_id).all()
+
+        self.response_to_json(response, districts)
 
 
 class MessageAll(Items):
