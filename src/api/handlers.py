@@ -31,7 +31,7 @@ class Items:
         else:
             response.status = falcon.HTTP_404
             body = {
-                'status': Status.NF,
+                'status': Status.NotFound,
             }
 
         response.set_header('Content-Type', 'application/json')
@@ -54,35 +54,37 @@ class Country(Items):
 
 
 class Region(Items):
-    def on_get(self, request, response, **kwargs):
+    model = models.Region
+
+    def _get_items(self, session, model, **kwargs):
         country_id = kwargs.get('country_id')
-
-        session = request.context['session']
-        regions = session.query(models.Region).filter(models.Region.country_id == country_id).all()
-
-        self.response_to_json(response, regions)
+        regions = session.query(model).filter(model.country_id == country_id).all()
+        return regions
 
 
 class City(Items):
-    def on_get(self, request, response, **kwargs):
+    model = models.City
+
+    def _get_items(self, session, model, **kwargs):
         country_id = kwargs.get('country_id')
         region_id = kwargs.get('region_id')
-
-        session = request.context['session']
         cities = session.query(models.City).filter(
-            models.City.country_id == country_id).filter(models.City.region_id == region_id)
-
-        self.response_to_json(response, cities)
+            model.country_id == country_id
+        ).filter(
+            model.region_id == region_id
+        )
+        return cities
 
 
 class District(Items):
-    def on_get(self, request, response, **kwargs):
+    model = models.District
+
+    def _get_items(self, session, model, **kwargs):
         city_id = kwargs.get('city_id')
-
-        session = request.context['session']
-        districts = session.query(models.District).filter(models.District.city_id == city_id).all()
-
-        self.response_to_json(response, districts)
+        districts = session.query(model).filter(
+            model.city_id == city_id
+        ).all()
+        return districts
 
 
 class MessageAll(Items):
