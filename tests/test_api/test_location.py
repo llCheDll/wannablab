@@ -7,15 +7,15 @@ from api.constants import Status
 def test_districts(session, client):
     districts = []
 
-    country = Country(id=5, title='Ukraine')
-    region = Region(id=5, title='Kyivska region', country_id=5)
-    city = City(id=5, title='Kyiv', region_id=5)
+    country = Country(id=1, title='Ukraine')
+    region = Region(id=1, title='Kyivska region', country_id=1)
+    city = City(id=1, title='Kyiv', region_id=1)
 
     for title in ['Obolonskiy', 'Pecherskiy']:
         districts.append(
             District(
                 title=title,
-                city_id=5
+                city_id=1
             )
         )
 
@@ -25,8 +25,8 @@ def test_districts(session, client):
     session.add_all(districts)
     session.commit()
 
-    resp = client.get('/api/v1/city/5/district/', as_response=True)
-    error_resp = client.get('/api/v1/city/10/district/', as_response=True)
+    resp = client.get('/api/v1/city/1/district/')
+    error_resp = client.get('/api/v1/city/10/district/')
 
     assert resp.status == falcon.HTTP_OK
     assert resp.json['status'] == Status.OK
@@ -45,15 +45,15 @@ def test_districts(session, client):
 def test_cities(session, client):
     cities = []
 
-    country1 = Country(id=3, title='Ukraine')
-    country2 = Country(id=4, title='Poland')
-    region1 = Region(id=3, title='Ivano-Frankivsk region', country_id=3)
-    region2 = Region(id=4, title='Varshava region', country_id=3)
+    country1 = Country(id=1, title='Ukraine')
+    country2 = Country(id=2, title='Poland')
+    region1 = Region(id=1, title='Ivano-Frankivsk region', country_id=1)
+    region2 = Region(id=2, title='Varshava region', country_id=1)
 
-    cities.append(City(title='Ivano-Frankivsk', region_id=3))
-    cities.append(City(title='Odessa', country_id=3))
-    cities.append(City(title='Varshava', region_id=4))
-    cities.append(City(title='Krakiv', country_id=4))
+    cities.append(City(title='Ivano-Frankivsk', region_id=1))
+    cities.append(City(title='Odessa', country_id=1))
+    cities.append(City(title='Varshava', region_id=2))
+    cities.append(City(title='Krakiv', country_id=2))
 
     session.add(country1)
     session.add(country2)
@@ -62,9 +62,9 @@ def test_cities(session, client):
     session.add_all(cities)
     session.commit()
 
-    resp_region = client.get('/api/v1/region/3/city/', as_response=True)
-    resp_country = client.get('/api/v1/country/3/city/', as_response=True)
-    error_resp = client.get('/api/v1/country/10/city/', as_response=True)
+    resp_region = client.get('/api/v1/region/1/city/')
+    resp_country = client.get('/api/v1/country/1/city/')
+    error_resp = client.get('/api/v1/country/10/city/')
 
     assert resp_region.status == falcon.HTTP_OK
     assert resp_region.json['status'] == Status.OK
@@ -88,7 +88,7 @@ def test_regions(session, client):
     regions = []
 
     country = Country(
-        id=2,
+        id=1,
         title='Ukraine',
     )
 
@@ -96,7 +96,7 @@ def test_regions(session, client):
         regions.append(
             Region(
                 title=title,
-                country_id=2
+                country_id=1
             )
         )
 
@@ -104,8 +104,8 @@ def test_regions(session, client):
     session.add_all(regions)
     session.commit()
 
-    resp = client.get('/api/v1/country/2/region/', as_response=True)
-    error_resp = client.get('/api/v1/country/10/region/', as_response=True)
+    resp = client.get('/api/v1/country/1/region/')
+    error_resp = client.get('/api/v1/country/10/region/')
 
     assert resp.status == falcon.HTTP_OK
     assert resp.json['status'] == Status.OK
@@ -131,7 +131,7 @@ def test_countries(session, client):
     session.add_all(countries)
     session.commit()
 
-    resp = client.get('/api/v1/country/', as_response=True)
+    resp = client.get('/api/v1/country/')
 
     assert resp.status == falcon.HTTP_OK
     assert resp.json['status'] == Status.OK
