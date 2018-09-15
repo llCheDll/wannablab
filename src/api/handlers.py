@@ -119,3 +119,14 @@ class MessageReceived(Items):
         ).all()
 
         return items
+
+
+class Message(Items):
+    model = models.Message
+
+    def _get_items(self, session, model, **kwargs):
+        message = session.query(model).filter(
+            model.id == kwargs['message_id']
+        ).all()
+
+        return message
