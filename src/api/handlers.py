@@ -119,3 +119,7 @@ class MessageReceived(Items):
         ).all()
 
         return items
+
+
+class Event(Items):
+    model = models.Event
