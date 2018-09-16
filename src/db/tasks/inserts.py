@@ -113,12 +113,18 @@ def insert(ctx):
         )
         session.add(region)
 
-        city = City(
+        city1 = City(
             title=f'city_{i}',
             country_id=i+1,
+            region_id=None
+        )
+        session.add(city1)
+        city2 = City(
+            title=f'city_{i}',
+            country_id=None,
             region_id=i+1
         )
-        session.add(city)
+        session.add(city2)
 
         district = District(
             title=f'district_{i}',
