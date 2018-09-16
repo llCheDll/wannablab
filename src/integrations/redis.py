@@ -1,15 +1,81 @@
-from redis import StrictRedis
+from redis import StrictRedis, ConnectionPool
 from config import settings
 from redis_lock import Lock, AlreadyAcquired
 
 
 class RedisClient:
-    def __init__(self):
-        self._connection = StrictRedis(host=settings.redis.host,
-                                       port=settings.redis.port,
-                                       db=0,
-                                       decode_responses=True
-                                       )
+    def __init__(self, db=settings.redis.db.cache):
+        self._pool = ConnectionPool(host=settings.redis.host, port=settings.redis.port, db=db, decode_responses=True)
+        self._connection = StrictRedis(connection_pool=self._pool, decode_responses=True)
+
+    def close(self):
+        "Disconnects from the Redis server"
+        del self._connection
+
+    def keys(self, pattern='*'):
+        "Returns a list of keys matching ``pattern``"
+        return self._connection.keys(pattern)
+
+    def zrank(self, name, value):
+        """
+        Returns a 0-based value indicating the rank of ``value`` in sorted set
+        ``name``
+        """
+        lock = Lock(self._connection, name)
+
+        try:
+            if lock.acquire():
+                result = self._connection.zrank(name, value)
+
+                lock.release()
+                return result
+            return False
+        except AlreadyAcquired:
+            return False
+
+    def zrem(self, name, *values):
+        "Remove member ``values`` from sorted set ``name``"
+        lock = Lock(self._connection, name)
+
+        try:
+            if lock.acquire():
+                result = self._connection.zrem(name, *values)
+
+                lock.release()
+                return result
+            return False
+        except AlreadyAcquired:
+            return False
+
+    def zcard(self, name):
+        "Return the number of elements in the sorted set ``name``"
+        lock = Lock(self._connection, name)
+
+        try:
+            if lock.acquire():
+                result = self._connection.zcard(name)
+
+                lock.release()
+                return result
+            return False
+        except AlreadyAcquired:
+            return False
+
+    def get(self, name):
+        """
+        Return the value at key ``name``, or None if the key doesn't exist
+        """
+        lock = Lock(self._connection, name)
+
+        try:
+            if lock.acquire():
+                result = self._connection.get(name)
+
+                lock.release()
+                return result
+            return False
+        except AlreadyAcquired:
+            return False
 
     def set(self, name, value, ex=None, px=None, nx=False, xx=False):
         """
