@@ -24,6 +24,7 @@ LANGUAGE_LVL_QTY = 5
 CATEGORIES_QTY = 10
 MAX_MEMBERS_QTY = 6
 MAX_RATING = 100
+cities = []
 
 
 @task(
@@ -113,18 +114,9 @@ def insert(ctx):
         )
         session.add(region)
 
-        city1 = City(
-            title=f'city_{i}',
-            country_id=i + 1,
-            region_id=None
-        )
-        session.add(city1)
-        city2 = City(
-            title=f'city_{i}',
-            country_id=None,
-            region_id=i + 1
-        )
-        session.add(city2)
+        cities.append(City(title=f'city_by_country_{i+1}', country_id=i + 1))
+        cities.append(City(title=f'city_by_region_{i+1}', region_id=i + 1))
+        session.add_all(cities)
 
         district = District(
             title=f'district_{i}',
