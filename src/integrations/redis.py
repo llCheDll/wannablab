@@ -9,11 +9,11 @@ class RedisClient:
         self._connection = StrictRedis(connection_pool=self._pool, decode_responses=True)
 
     def close(self):
-        "Disconnects from the Redis server"
+        """Disconnects from the Redis server"""
         del self._connection
 
     def keys(self, pattern='*'):
-        "Returns a list of keys matching ``pattern``"
+        """Returns a list of keys matching ``pattern``"""
         return self._connection.keys(pattern)
 
     def zrank(self, name, value):
@@ -34,7 +34,7 @@ class RedisClient:
             return False
 
     def zrem(self, name, *values):
-        "Remove member ``values`` from sorted set ``name``"
+        """Remove member ``values`` from sorted set ``name``"""
         lock = Lock(self._connection, name)
 
         try:
@@ -48,7 +48,7 @@ class RedisClient:
             return False
 
     def zcard(self, name):
-        "Return the number of elements in the sorted set ``name``"
+        """Return the number of elements in the sorted set ``name``"""
         lock = Lock(self._connection, name)
 
         try:
@@ -65,17 +65,9 @@ class RedisClient:
         """
         Return the value at key ``name``, or None if the key doesn't exist
         """
-        lock = Lock(self._connection, name)
-
-        try:
-            if lock.acquire():
-                result = self._connection.get(name)
-
-                lock.release()
-                return result
-            return False
-        except AlreadyAcquired:
-            return False
+        with self._connection.pipeline(transaction=False) as pipe:
+            pipe.get(name)
+            return pipe.execute()
 
     def set(self, name, value, ex=None, px=None, nx=False, xx=False):
         """
@@ -191,7 +183,66 @@ class RedisClient:
             pipe.hmget(name, args)
             return pipe.execute()
 
-    def zrange(self, name, start=0, end=-1, desc=False, withscores=False, score_cast_func=float):
+    def hdel(self, name, *args):
+        """
+        "Delete ``keys`` from hash ``name``"
+        """
+        lock = Lock(self._connection, name)
+
+        try:
+            if lock.acquire():
+                result = self._connection.hdel(name, *args)
+
+                lock.release()
+                return result
+            return False
+        except AlreadyAcquired:
+            return False
+
+    def hexists(self, name, key):
+        """
+        Returns a boolean indicating if ``key`` exists within hash ``name``
+        """
+        lock = Lock(self._connection, name)
+
+        try:
+            if lock.acquire():
+                result = self._connection.hexists(name, key)
+
+                lock.release()
+                return result
+            return False
+        except AlreadyAcquired:
+            return False
+
+    def hgetall(self, name):
+        """Return a Python list of dict of the hash's name/value pairs"""
+        with self._connection.pipeline(transaction=False) as pipe:
+            pipe.hgetall(name)
+            return pipe.execute()
+
+    def exists(self, name):
+        """
+        Returns a boolean indicating whether key ``name`` exists
+        """
+        lock = Lock(self._connection, name)
+
+        try:
+            if lock.acquire():
+                result = self._connection.exists(name)
+
+                lock.release()
+                return result
+            return False
+        except AlreadyAcquired:
+            return False
+
+    def delete(self, *args):
+        return self._connection.delete(*args)
+
+    def zrange(
+            self, name, start=0, end=-1, desc=False, withscores=False, score_cast_func=float
+                ):
         """
         Return a range of values from sorted set ``name`` between
         ``start`` and ``end`` sorted in ascending order.
