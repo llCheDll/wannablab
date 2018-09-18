@@ -1,15 +1,17 @@
-from redis import StrictRedis
+from redis import StrictRedis, ConnectionPool
 from config import settings
 from redis_lock import Lock, AlreadyAcquired
 
 
 class RedisClient:
-    def __init__(self):
-        self._connection = StrictRedis(host=settings.redis.host,
-                                       port=settings.redis.port,
-                                       db=0,
-                                       decode_responses=True
-                                       )
+    def __init__(self, db=settings.redis.db.cache):
+        self._pool = ConnectionPool(host=settings.redis.host, port=settings.redis.port, db=db, decode_responses=True)
+        self._connection = StrictRedis(connection_pool=self._pool, decode_responses=True)
+
+    def close(self):
+        self._connection.
+
+
 
     def set(self, name, value, ex=None, px=None, nx=False, xx=False):
         """

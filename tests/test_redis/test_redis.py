@@ -14,11 +14,12 @@ redis_my = factories.redisdb('redis_my_proc')
 
 def test_redis_set(redis_my_proc, redis_my):
     redisclient = RedisClient()
+    redisclient1 = RedisClient()
 
     assert redisclient.set('key1', 'value1') is True
     assert redisclient.set('key2', 'value2') is True
-    assert redisclient.set('key3', 'value3') is True
-    assert redisclient.set('key4', 'value4') is True
+    assert redisclient1.set('key3', 'value3') is True
+    assert redisclient1.set('key4', 'value4') is True
 
     values = ['value1', 'value2', 'value3', 'value4']
 
@@ -57,3 +58,10 @@ def test_redis_zset(redis_my_proc, redis_my):
                     )[0] == [('key1', 42), ('key2', 49)]
 
     redis_my.flushall()
+
+def test_close(redis_my_proc, redis_my):
+    redisclient = RedisClient()
+
+    assert redisclient.set('key1', 'value1') is True
+    redisclient.close()
+    assert redisclient.set('key1', 'value1') is True
