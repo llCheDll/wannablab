@@ -3,22 +3,22 @@ from config import settings
 from redis_lock import Lock, AlreadyAcquired
 
 
-# def lock_decorator(func):
-#     def wrapper(self, *args, **kwargs):
-#         lock = Lock(redis_client=self._connection, name=args[0])
-#
-#         try:
-#             if lock.acquire():
-#                 result = func(self, *args, **kwargs)
-#
-#                 lock.release()
-#                 return result
-#             return False
-#         except AlreadyAcquired:
-#             return False
-#         # except UnicodeDecodeError:
-#         #     return False
-#     return wrapper
+def lock_decorator(func):
+    def wrapper(self, *args, **kwargs):
+        lock = Lock(redis_client=self._connection, name=args[0])
+
+        try:
+            if lock.acquire():
+                result = func(self, *args, **kwargs)
+
+                lock.release()
+                return result
+            return False
+        except AlreadyAcquired:
+            return False
+        # except UnicodeDecodeError:
+        #     return False
+    return wrapper
 
 
 class RedisClient:
@@ -34,50 +34,23 @@ class RedisClient:
         """Returns a list of keys matching ``pattern``"""
         return self._connection.keys(pattern)
 
+    @lock_decorator
     def zrank(self, name, value):
         """
         Returns a 0-based value indicating the rank of ``value`` in sorted set
         ``name``
         """
-        lock = Lock(self._connection, name)
+        return self._connection.zrank(name, value)
 
-        try:
-            if lock.acquire():
-                result = self._connection.zrank(name, value)
-
-                lock.release()
-                return result
-            return False
-        except AlreadyAcquired:
-            return False
-
+    @lock_decorator
     def zrem(self, name, *values):
         """Remove member ``values`` from sorted set ``name``"""
-        lock = Lock(self._connection, name)
+        return self._connection.zrem(name, *values)
 
-        try:
-            if lock.acquire():
-                result = self._connection.zrem(name, *values)
-
-                lock.release()
-                return result
-            return False
-        except AlreadyAcquired:
-            return False
-
+    @lock_decorator
     def zcard(self, name):
         """Return the number of elements in the sorted set ``name``"""
-        lock = Lock(self._connection, name)
-
-        try:
-            if lock.acquire():
-                result = self._connection.zcard(name)
-
-                lock.release()
-                return result
-            return False
-        except AlreadyAcquired:
-            return False
+        return self._connection.zcard(name)
 
     def get(self, name):
         """
@@ -87,6 +60,7 @@ class RedisClient:
             pipe.get(name)
             return pipe.execute()
 
+    @lock_decorator
     def set(self, name, value, ex=None, px=None, nx=False, xx=False):
         """
         Set the value at key ``name`` to ``value``
@@ -102,18 +76,9 @@ class RedisClient:
                     ``name`` to ``value`` only if it already exists.
         :return: True if it set`s.
         """
-        lock = Lock(self._connection, name)
+        return self._connection.set(name, value, ex=ex, px=px, nx=nx, xx=xx)
 
-        try:
-            if lock.acquire():
-                result = self._connection.set(name, value, ex=ex, px=px, nx=nx, xx=xx)
-
-                lock.release()
-                return result
-            return False
-        except AlreadyAcquired:
-            return False
-
+    @lock_decorator
     def getset(self, name, value):
         """
         Sets the value at key ``name`` to ``value``.
@@ -122,18 +87,9 @@ class RedisClient:
         :param value: value
         :return: The old value at key ``name``.
         """
-        lock = Lock(self._connection, name)
+        return self._connection.getset(name, value)
 
-        try:
-            if lock.acquire():
-                result = self._connection.getset(name, value)
-                lock.release()
-
-                return result
-            return False
-        except AlreadyAcquired:
-            return False
-
+    @lock_decorator
     def hmset(self, name, **kwargs):
         """
         Set key to value within hash ``name`` for each corresponding
@@ -143,18 +99,9 @@ class RedisClient:
         :param kwargs: key=value
         :return: True if it set`s
         """
-        lock = Lock(self._connection, name)
+        return self._connection.hmset(name, kwargs)
 
-        try:
-            if lock.acquire():
-                result = self._connection.hmset(name, kwargs)
-
-                lock.release()
-                return result
-            return False
-        except AlreadyAcquired:
-            return False
-
+    @lock_decorator
     def zset(self, name, *args):
         """
         Zset method of the RedisClient class.
@@ -167,17 +114,7 @@ class RedisClient:
             >>redis_client.zset('sorted_set', 42, 'arg1', 42.0, 'arg2')
             >>2
         """
-        lock = Lock(self._connection, name)
-
-        try:
-            if lock.acquire():
-                result = self._connection.execute_command('ZADD', name, *args)
-
-                lock.release()
-                return result
-            return False
-        except AlreadyAcquired:
-            return False
+        return self._connection.execute_command('ZADD', name, *args)
 
     def get_multiple(self, *keys):
         """
@@ -205,33 +142,14 @@ class RedisClient:
         """
         "Delete ``keys`` from hash ``name``"
         """
-        lock = Lock(self._connection, name)
+        return self._connection.hdel(name, *args)
 
-        try:
-            if lock.acquire():
-                result = self._connection.hdel(name, *args)
-
-                lock.release()
-                return result
-            return False
-        except AlreadyAcquired:
-            return False
-
+    @lock_decorator
     def hexists(self, name, key):
         """
         Returns a boolean indicating if ``key`` exists within hash ``name``
         """
-        lock = Lock(self._connection, name)
-
-        try:
-            if lock.acquire():
-                result = self._connection.hexists(name, key)
-
-                lock.release()
-                return result
-            return False
-        except AlreadyAcquired:
-            return False
+        return self._connection.hexists(name, key)
 
     def hgetall(self, name):
         """Return a Python list of dict of the hash's name/value pairs"""
@@ -239,28 +157,19 @@ class RedisClient:
             pipe.hgetall(name)
             return pipe.execute()
 
+    @lock_decorator
     def exists(self, name):
         """
         Returns a boolean indicating whether key ``name`` exists
         """
-        lock = Lock(self._connection, name)
-
-        try:
-            if lock.acquire():
-                result = self._connection.exists(name)
-
-                lock.release()
-                return result
-            return False
-        except AlreadyAcquired:
-            return False
+        return self._connection.exists(name)
 
     def delete(self, *args):
         return self._connection.delete(*args)
 
     def zrange(
             self, name, start=0, end=-1, desc=False, withscores=False, score_cast_func=float
-                ):
+    ):
         """
         Return a range of values from sorted set ``name`` between
         ``start`` and ``end`` sorted in ascending order.

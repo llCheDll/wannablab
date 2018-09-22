@@ -1,6 +1,8 @@
-from integrations.redis import RedisClient
-from pytest_redis import factories
+# from integrations.redis import RedisClient
 from config import settings
+from integrations.redis_test_lock_decorator import RedisClient
+from pytest_redis import factories
+from redis_lock import Lock
 
 redis_my_proc = factories.redis_proc(
                     executable='/usr/local/bin/redis-server',
@@ -210,5 +212,17 @@ def test_redis_delete(redis_my):
 
     assert redisclient.delete('key1') == 1
     assert redisclient.delete('key2', 'key3', 'key4') == 3
+
+    redis_my.flushall()
+
+
+def test_redis_lock(redis_my):
+    redisclient = RedisClient()
+
+    lock_test = Lock(redisclient._connection, 'key1')
+    lock_test.acquire()
+
+    assert redisclient.set('key2', 'value2') is True
+    assert redisclient.set('key1', 'value1') is False
 
     redis_my.flushall()
