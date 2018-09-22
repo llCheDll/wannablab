@@ -146,3 +146,30 @@ class Event(Items):
             events = events.filter(getattr(operator, 'eq')(getattr(model, param), value))
 
         return events.all()
+
+
+class User(Items):
+    model = models.User
+
+    def _get_items(self, session, model, request, **kwargs):
+
+        users = session.query(model).outerjoin(
+            models.Language, models.User.language).filter(
+            models.Language.title == kwargs['language_title']
+        )
+
+        for param, value in request.params.items():
+            users = users.filter(getattr(operator, 'eq')(getattr(model, param), value))
+
+        return users.all()
+
+
+class Comment(Items):
+    model = models.Comment
+
+    def _get_items(self, session, model, request, **kwargs):
+
+        comments = session.query(model).filter(
+            model.recipient_id == kwargs['user_id']).all()
+
+        return comments
