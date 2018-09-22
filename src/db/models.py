@@ -150,6 +150,7 @@ class Country(Base):
 
     locations = relationship('Location')
     regions = relationship('Region')
+    cities = relationship('City')
 
 
 class Region(Base):
@@ -172,6 +173,7 @@ class City(Base):
     title = Column(String, nullable=False)
 
     region_id = Column(Integer, ForeignKey('region.id'))
+    country_id = Column(Integer, ForeignKey('country.id'))
 
     locations = relationship('Location')
     region = relationship('Region')
