@@ -13,7 +13,8 @@ from sqlalchemy import (
     UniqueConstraint,
     DateTime,
     Numeric,
-    func
+    func,
+    JSON,
 )
 
 
@@ -68,6 +69,7 @@ class User(Base):
     friends = relationship('User', secondary=friends_association_table,
                            primaryjoin=id == friends_association_table.c.first_user,
                            secondaryjoin=id == friends_association_table.c.second_user)
+    token_id = Column(JSON)
 
 
 class Category(Base):
@@ -226,3 +228,12 @@ class Message(Base):
     text = Column(Text, nullable=False)
 
     received = Column(Boolean, nullable=False)
+
+
+class Session(Base):
+    __tablename__ = 'session'
+
+    session_id = Column(String, primary_key=True)
+    timeout = Column(DateTime, default=func.current_timestamp())
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship('User')
