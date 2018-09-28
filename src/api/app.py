@@ -1,6 +1,7 @@
 import falcon
 from db.utils import init_session
 from .handlers import (
+    Login,
     Region,
     Country,
     City,
@@ -13,11 +14,13 @@ from .handlers import (
     MessageReceived,
     Message,
 )
-from .middlewares import DatabaseSessionManagerMiddleware
+from .middlewares import DatabaseSessionManagerMiddleware, FalconAuthMiddleware
 
 
 def configure_app(application):
     application.add_route('/api/v1/ping/', Ping())
+    application.add_route('/api/v1/login/', Login())
+    # application.add_route('/api/v1/login/{username}:{password}', Login())
     application.add_route('/api/v1/category/', Category())
     application.add_route('/api/v1/language/', Language())
     application.add_route('/api/v1/country/', Country())
@@ -39,5 +42,10 @@ def configure_app(application):
     return application
 
 
-session = init_session()
-app = configure_app(falcon.API(middleware=[DatabaseSessionManagerMiddleware(session)]))
+session_db = init_session()
+
+app = configure_app(
+    falcon.API(
+        middleware=[DatabaseSessionManagerMiddleware(session_db), FalconAuthMiddleware()]
+    )
+)

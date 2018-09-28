@@ -1,10 +1,38 @@
-import ujson
 import falcon
+import hashlib
 from sqlalchemy import or_
+import ujson
 
 from .constants import Status
 from .helpers import row2dict
 from db import models
+import jinja2
+import os
+
+
+def load_template(name):
+    path = os.path.join('templates', name)
+    with open(os.path.abspath(path), 'r') as fp:
+        return jinja2.Template(fp.read())
+
+
+def encrypt(user_credentials, salt):
+    return hashlib.pbkdf2_hmac('sha256', user_credentials.encode(), salt.encode(), 100000).hex()
+
+
+def parse_data(request):
+    json_data = []
+    data = request.bounded_stream.read().decode('utf-8')
+    data = data.replace('=', ':').split('&')
+
+    for item in data:
+        json_data.append(item.split(':'))
+
+    json_data = dict(json_data)
+
+    json_data['psw'] = encrypt(json_data['psw'], 'ololo')
+
+    return json_data
 
 
 class Ping:
@@ -12,6 +40,24 @@ class Ping:
         response.set_header('Content-Type', 'application/json')
         response.status = falcon.HTTP_200
         response.body = ujson.dumps({'status': Status.OK})
+
+
+class Login:
+    def on_post(self, request, response):
+        stream_data = parse_data(request)
+
+        import ipdb
+        ipdb.set_trace()
+
+    def on_get(self, request, response):
+        template = load_template('login.html')
+        response.status = falcon.HTTP_200
+        response.content_type = 'text/html'
+        response.body = template.render(something='testing')
+
+
+class Register:
+    pass
 
 
 class Items:

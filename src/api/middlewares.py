@@ -1,3 +1,4 @@
+import falcon
 import sqlalchemy.orm.scoping as scoping
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -56,3 +57,21 @@ class DatabaseSessionManagerMiddleware(object):
             session.rollback()
         else:
             session.close()
+
+
+class FalconAuthMiddleware(object):
+
+    def process_request(self, request, response):
+        token = request.get_header('Authorization')
+        account_id = request.get_header('Session-ID')
+
+        if token is None:
+            pass
+
+        if self._token_is_valid(token, account_id):
+            pass
+
+
+
+    def _token_is_valid(self, token, session_id):
+        return True  # Suuuuuure it's valid...
