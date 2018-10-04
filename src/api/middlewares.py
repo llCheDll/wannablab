@@ -62,14 +62,19 @@ class DatabaseSessionManagerMiddleware(object):
 class FalconAuthMiddleware(object):
 
     def process_request(self, request, response):
-        token = request.get_header('Authorization')
-        account_id = request.get_header('Session-ID')
+        excepted_path = '/api/v1/login'
+        # import ipdb
+        # ipdb.set_trace()
 
-        if token is None:
-            pass
-
-        if self._token_is_valid(token, account_id):
-            pass
+        if request.path is not excepted_path:
+            token = request.get_header('Cookie')
+            # import ipdb
+            # ipdb.set_trace()
+            # account_id = request.get_header('Session-ID')
+            # if token is None:
+            #     raise falcon.HTTPUnauthorized()
+            # if self._token_is_valid(token, account_id):
+            #     pass
 
 
 

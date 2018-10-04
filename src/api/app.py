@@ -2,6 +2,7 @@ import falcon
 from db.utils import init_session
 from .handlers import (
     Login,
+    Logout,
     Region,
     Country,
     City,
@@ -20,7 +21,7 @@ from .middlewares import DatabaseSessionManagerMiddleware, FalconAuthMiddleware
 def configure_app(application):
     application.add_route('/api/v1/ping/', Ping())
     application.add_route('/api/v1/login/', Login())
-    # application.add_route('/api/v1/login/{username}:{password}', Login())
+    application.add_route('/api/v1/logout/', Logout())
     application.add_route('/api/v1/category/', Category())
     application.add_route('/api/v1/language/', Language())
     application.add_route('/api/v1/country/', Country())

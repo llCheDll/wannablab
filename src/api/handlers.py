@@ -14,12 +14,50 @@ class Ping:
         response.body = ujson.dumps({'status': Status.OK})
 
 
+class Logout:
+    def on_get(self, request, response):
+        template = load_template('logout.html')
+        response.status = falcon.HTTP_200
+        response.content_type = 'text/html'
+        response.body = template.render(something='testing')
+
+    def on_post(self, request, response):
+        body = request.stream.read()
+
+        if isinstance(body, bytes):
+            body = body.decode()
+
+        body = falcon.uri.parse_query_string(body)
+
+        if body['accept']:
+            response.unset_cookie('token')
+            response.body = ujson.dumps({"message": "You logout succesfuly"})
+            response.status = falcon.HTTP_201
+
+
 class Login:
     def on_post(self, request, response):
-        stream_data = parse_data(request)
+        body = request.stream.read()
 
-        import ipdb
-        ipdb.set_trace()
+        if isinstance(body, bytes):
+            body = body.decode()
+
+        body = falcon.uri.parse_query_string(body)
+
+        model = models.User
+        session = request.context['session']
+        user = session.query(model).filter(
+                model.first_name==body['uname']
+                        ).filter(
+                    model.password==body['psw']).all()
+
+        if not user:
+            response.body = ujson.dumps({"message": "Your login or password incorrect"})
+            response.status = falcon.HTTP_401
+        else:
+            response.set_cookie(name='token', value='jkhaslkjdf', path='/api/v1/', secure=False)
+            response.body = ujson.dumps({"message": "You Log In"})
+            response.status = falcon.HTTP_200
 
     def on_get(self, request, response):
         template = load_template('login.html')
@@ -36,6 +74,8 @@ class Items:
     model = None
 
     def on_get(self, request, response, **kwargs):
+        # import ipdb
+        # ipdb.set_trace()
         session = request.context['session']
         items = self._get_items(session, self.model, **kwargs)
         data_list = [row2dict(item) for item in items]
