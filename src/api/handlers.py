@@ -173,3 +173,72 @@ class Comment(Items):
             model.recipient_id == kwargs['user_id']).all()
 
         return comments
+
+
+class UserProfile(Items):
+    pass
+    # model = models.User
+    #
+    # def on_get(self, request, response, **kwargs):
+    #     session = request.context['session']
+    #
+    #     data_list = self._get_items(session, self.model, request, **kwargs)
+    #
+    #     if data_list:
+    #         response.status = falcon.HTTP_200
+    #         body = {
+    #             'status': Status.OK,
+    #             'data': data_list
+    #         }
+    #     else:
+    #         response.status = falcon.HTTP_404
+    #         body = {
+    #             'status': Status.NotFound,
+    #         }
+    #
+    #     response.set_header('Content-Type', 'application/json')
+    #     response.body = ujson.dumps(body)
+    #
+    # def _get_items(self, session, model, request, **kwargs):
+    #     fields_authorized = [
+    #         'id',
+    #         'first_name',
+    #         'last_name',
+    #         'gender',
+    #         'birthday',
+    #         'info',
+    #         'photo',
+    #         'phone',
+    #         'email',
+    #         'facebook',
+    #         'instagram',
+    #         'twitter',
+    #         'country',
+    #         'city',
+    #         'rating',
+    #         # 'language_title',
+    #         # 'language_level',
+    #     ]
+    #
+    #     items = session.query(model).outerjoin(models.Language, model.language).filter(
+    #         model.id == kwargs['user_id']
+    #     ).all()
+    #     # # data_list = [row2dict_limited(item, fields_authorized) for item in items]
+    #     # data_list = [row2dict(item) for item in items]
+    #
+    #     data_list = {}
+    #     for item in items:
+    #         for key in item.__mapper__._props.keys():
+    #             import ipdb
+    #             ipdb.set_trace()
+    #             if isinstance(getattr(item, key), list):
+    #                 data_list[key] = row2dict(getattr(item, key))
+    #             else:
+    #                 data_list[key] = getattr(item, key)
+    #
+    #     # isinstance(items[0].language, list)
+    #
+    #     # import ipdb
+    #     # ipdb.set_trace()
+    #
+    #     return data_list

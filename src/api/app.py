@@ -15,6 +15,7 @@ from .handlers import (
     MessageSent,
     MessageReceived,
     Message,
+    UserProfile,
 )
 from .middlewares import DatabaseSessionManagerMiddleware
 
@@ -41,6 +42,7 @@ def configure_app(application):
         '/api/v1/message/{message_id}/',
         Message()
     )
+    application.add_route('/api/v1/user/{user_id}/', UserProfile())
 
     return application
 
