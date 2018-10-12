@@ -1,10 +1,12 @@
+import jwt
 import falcon
 from sqlalchemy import or_
 import ujson
 
-from .constants import Status
-from .helpers import row2dict, load_template, parse_data
+from .constants import Status, JWT_SECRET, JWT_ALGORITHM
+from .helpers import row2dict, load_template, logout, parse_data
 from db import models
+from datetime import datetime, timedelta
 
 
 class Ping:
@@ -14,53 +16,41 @@ class Ping:
         response.body = ujson.dumps({'status': Status.OK})
 
 
-class Logout:
-    def on_get(self, request, response):
-        template = load_template('logout.html')
-        response.status = falcon.HTTP_200
-        response.content_type = 'text/html'
-        response.body = template.render(something='testing')
-
+class Authorization:
+    @falcon.before(logout)
     def on_post(self, request, response):
-        body = request.stream.read()
-
-        if isinstance(body, bytes):
-            body = body.decode()
-
-        body = falcon.uri.parse_query_string(body)
-
-        if body['accept']:
-            response.unset_cookie('token')
-            response.body = ujson.dumps({"message": "You logout succesfuly"})
-            response.status = falcon.HTTP_201
-
-
-class Login:
-    def on_post(self, request, response):
-        body = request.stream.read()
-
-        if isinstance(body, bytes):
-            body = body.decode()
-
-        body = falcon.uri.parse_query_string(body)
+        body = parse_data(request)
 
         model = models.User
         session = request.context['session']
-        user = session.query(model).filter(
-                model.first_name==body['uname']
-                        ).filter(
-                    model.password==body['psw']).all()
 
-        if not user:
-            response.body = ujson.dumps({"message": "Your login or password incorrect"})
-            response.status = falcon.HTTP_401
-        else:
-            response.set_cookie(name='token', value='jkhaslkjdf', path='/api/v1/', secure=False)
-            response.body = ujson.dumps({"message": "You Log In"})
-            response.status = falcon.HTTP_200
+        user = session.query(model).filter_by(
+            email=body['email'][0]
+        ).one_or_none()
+
+        if user is None or user.password != body['password'][0]:
+            response.body = ujson.dumps({"message": "Wrong credentialst"})
+            response.status = falcon.HTTP_400
+            return response
+
+        payload = {
+            'user_id': user.id,
+            'exp': datetime.now()+timedelta(days=10)
+        }
+
+        jwt_token = jwt.encode(payload, JWT_SECRET, JWT_ALGORITHM)
+
+        response.set_cookie(
+            'token', jwt_token.decode('utf-8'), path='/', secure=False
+        )
+        response.status = falcon.HTTP_301
 
     def on_get(self, request, response):
-        template = load_template('login.html')
+        if 'COOKIE' in request.headers:
+            template = load_template('logout.html')
+        else:
+            template = load_template('login.html')
+
         response.status = falcon.HTTP_200
         response.content_type = 'text/html'
         response.body = template.render(something='testing')

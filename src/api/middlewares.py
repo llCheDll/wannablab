@@ -1,8 +1,11 @@
 import falcon
+import jwt
 import sqlalchemy.orm.scoping as scoping
 from sqlalchemy.exc import SQLAlchemyError
+from .helpers import logout
 
 from config import settings
+from .constants import JWT_SECRET, JWT_ALGORITHM
 
 
 class DatabaseSessionManagerMiddleware(object):
@@ -60,23 +63,28 @@ class DatabaseSessionManagerMiddleware(object):
 
 
 class FalconAuthMiddleware(object):
+    def __init__(self):
+        self._unprotectedUri = ['/api/v1', '/api/v1/auth', '/api/v1/events', '/api/v1/users']
 
     def process_request(self, request, response):
-        excepted_path = '/api/v1/login'
-        # import ipdb
-        # ipdb.set_trace()
-
-        if request.path is not excepted_path:
+        if request.relative_uri not in self._unprotectedUri:
             token = request.get_header('Cookie')
-            # import ipdb
-            # ipdb.set_trace()
-            # account_id = request.get_header('Session-ID')
-            # if token is None:
-            #     raise falcon.HTTPUnauthorized()
-            # if self._token_is_valid(token, account_id):
-            #     pass
+
+            if token is None:
+                raise falcon.HTTPUnauthorized()
+
+            if self._token_is_valid(token, request, response):
+                pass
 
 
+    def _token_is_valid(self, token, request, response):
+        jwt_token = token.split('=')[1]
 
-    def _token_is_valid(self, token, session_id):
-        return True  # Suuuuuure it's valid...
+        try:
+            payload = jwt.decode(jwt_token, JWT_SECRET,
+                                 algorithms=[JWT_ALGORITHM])
+
+        except (jwt.exceptions.DecodeError, jwt.exceptions.ExpiredSignatureError):
+            logout(request, response)
+
+        return True

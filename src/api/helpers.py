@@ -1,6 +1,7 @@
-import hashlib
 import jinja2
 import os
+import falcon
+from urllib.parse import parse_qs
 
 
 def row2dict(row):
@@ -13,20 +14,21 @@ def load_template(name):
         return jinja2.Template(fp.read())
 
 
-def encrypt(user_credentials, salt):
-    return hashlib.pbkdf2_hmac('sha256', user_credentials.encode(), salt.encode(), 100000).hex()
+def logout(request, response, *args, **kwargs):
+    if 'COOKIE' in request.headers:
+        response.set_cookie(
+            'token', '', path='/', secure=False
+        )
+        response.unset_cookie('token')
+        raise falcon.HTTPSeeOther('/api/v1/auth/')
 
 
 def parse_data(request):
-    json_data = []
-    data = request.bounded_stream.read().decode('utf-8')
-    data = data.replace('=', ':').split('&')
+    body = request.stream.read()
 
-    for item in data:
-        json_data.append(item.split(':'))
+    if isinstance(body, bytes):
+        body = body.decode()
 
-    json_data = dict(json_data)
+    body = parse_qs(body)
 
-    json_data['psw'] = encrypt(json_data['psw'], 'ololo')
-
-    return json_data
+    return body
