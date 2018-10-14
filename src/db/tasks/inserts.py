@@ -23,6 +23,7 @@ LANGUAGES_QTY = 10
 LANGUAGE_LVL_QTY = 5
 CATEGORIES_QTY = 10
 MAX_MEMBERS_QTY = 6
+MAX_FRIENDS_QTY = 2
 MAX_RATING = 100
 cities = []
 
@@ -96,7 +97,8 @@ def insert(ctx):
             country='Ukraine',
             city="Kyiv",
             rating=rating,
-            birthday=date(2002, 10, 11)
+            birthday=date(2002, 10, 11),
+            language=language_id,
         )
         session.add(user)
 
@@ -178,6 +180,18 @@ def insert(ctx):
         session.add(current_event)
 
     session.commit()
+
+    # add friends
+    for i in range(1, USERS_QTY-MAX_FRIENDS_QTY, MAX_FRIENDS_QTY+1):
+        current_user = session.query(User).get(i)
+
+        friends = []
+        for j in range(1, MAX_FRIENDS_QTY+1):
+            friends.append(
+                session.query(User).get(i+j)
+            )
+        current_user.friends = friends
+        session.add(current_user)
 
     # create messages
     for i in range(USERS_QTY):
