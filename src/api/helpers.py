@@ -6,12 +6,11 @@ def row2dict(row):
 
 
 def query2list(items_list, depth=0):
-    """
-    Convert sqlalchemy request from database to list of dictionaries. Nested objects
-     within the specified 'depth' are converted the same.
+    """Convert sqlalchemy request from database to list of dictionaries.
+        Nested objects within the specified 'depth' are converted the same.
     :param items_list: query from sqlalchemy database to be transferred to list of dictionaries
     :param depth: max level of nested objects to be disclosure.
-     The last level is disclosed as name of class.
+        The last level is disclosed as name of class.
     :return: list of dictionaries
     """
     data_list = []
@@ -23,8 +22,7 @@ def query2list(items_list, depth=0):
             if depth > 0 and isinstance(getattr(item, key), list):
                 item_dict[key] = query2list(getattr(item, key), depth - 1)
             elif (depth > 0 and
-                  getattr(getattr(item, key), '__module__', None) == models.__name__
-            ):
+                  getattr(getattr(item, key), '__module__', None) == models.__name__):
                 item_dict[key] = query2list([getattr(item, key)], depth - 1)
 
             else:
