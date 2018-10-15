@@ -1,9 +1,10 @@
+import operator
 import ujson
 import falcon
 from sqlalchemy import or_
 
 from .constants import Status
-from .helpers import row2dict
+from .helpers import query2list
 from db import models
 
 
@@ -19,8 +20,9 @@ class Items:
 
     def on_get(self, request, response, **kwargs):
         session = request.context['session']
-        items = self._get_items(session, self.model, **kwargs)
-        data_list = [row2dict(item) for item in items]
+
+        items = self._get_items(session, self.model, request, **kwargs)
+        data_list = query2list(items, 2)
 
         if data_list:
             response.status = falcon.HTTP_200
@@ -37,7 +39,7 @@ class Items:
         response.set_header('Content-Type', 'application/json')
         response.body = ujson.dumps(body)
 
-    def _get_items(self, session, model, **kwargs):
+    def _get_items(self, session, model, request, **kwargs):
         return session.query(model).all()
 
 
@@ -56,7 +58,7 @@ class Country(Items):
 class Region(Items):
     model = models.Region
 
-    def _get_items(self, session, model, **kwargs):
+    def _get_items(self, session, model, request, **kwargs):
         country_id = kwargs.get('country_id')
         regions = session.query(model).filter(model.country_id == country_id).all()
         return regions
@@ -65,9 +67,10 @@ class Region(Items):
 class City(Items):
     model = models.City
 
-    def _get_items(self, session, model, **kwargs):
+    def _get_items(self, session, model, request, **kwargs):
         country_id = kwargs.get('country_id')
         region_id = kwargs.get('region_id')
+
         cities = session.query(models.City).filter(
             model.country_id == country_id
         ).filter(
@@ -79,7 +82,7 @@ class City(Items):
 class District(Items):
     model = models.District
 
-    def _get_items(self, session, model, **kwargs):
+    def _get_items(self, session, model, request, **kwargs):
         city_id = kwargs.get('city_id')
         districts = session.query(model).filter(
             model.city_id == city_id
@@ -90,7 +93,7 @@ class District(Items):
 class MessageAll(Items):
     model = models.Message
 
-    def _get_items(self, session, model, **kwargs):
+    def _get_items(self, session, model, request, **kwargs):
         items = session.query(model).filter(or_(
             model.author_id == kwargs['user_id'],
             model.recipient_id == kwargs['user_id'],
@@ -102,7 +105,7 @@ class MessageAll(Items):
 class MessageSent(Items):
     model = models.Message
 
-    def _get_items(self, session, model, **kwargs):
+    def _get_items(self, session, model, request, **kwargs):
         items = session.query(model).filter(
             model.author_id == kwargs['user_id'],
         ).all()
@@ -113,7 +116,7 @@ class MessageSent(Items):
 class MessageReceived(Items):
     model = models.Message
 
-    def _get_items(self, session, model, **kwargs):
+    def _get_items(self, session, model, request, **kwargs):
         items = session.query(model).filter(
             model.recipient_id == kwargs['user_id'],
         ).all()
@@ -124,9 +127,62 @@ class MessageReceived(Items):
 class Message(Items):
     model = models.Message
 
-    def _get_items(self, session, model, **kwargs):
+    def _get_items(self, session, model, request, **kwargs):
         message = session.query(model).filter(
             model.id == kwargs['message_id']
         ).all()
 
         return message
+
+
+class Event(Items):
+    model = models.Event
+
+    def _get_items(self, session, model, request, **kwargs):
+
+        events = session.query(model)
+
+        for param, value in request.params.items():
+            events = events.filter(getattr(operator, 'eq')(getattr(model, param), value))
+
+        return events.all()
+
+
+class User(Items):
+    model = models.User
+
+    def _get_items(self, session, model, request, **kwargs):
+
+        users = session.query(model).outerjoin(
+            models.Language, models.User.language).filter(
+            models.Language.title == kwargs['language_title']
+        )
+
+        for param, value in request.params.items():
+            users = users.filter(getattr(operator, 'eq')(getattr(model, param), value))
+
+        return users.all()
+
+
+class Comment(Items):
+    model = models.Comment
+
+    def _get_items(self, session, model, request, **kwargs):
+
+        comments = session.query(model).filter(
+            model.recipient_id == kwargs['user_id']).all()
+
+        return comments
+
+
+class UserProfile(Items):
+    model = models.User
+
+    def _get_items(self, session, model, request, **kwargs):
+        items = session.query(model).outerjoin(
+            models.Language, model.language
+        ).filter(
+            model.id == kwargs['user_id']
+        ).all()
+
+        return items

@@ -8,6 +8,7 @@ settings.local.yaml
 
 .coverage
 cover/
+htmlcov/
 
 .pytest_cache
 
