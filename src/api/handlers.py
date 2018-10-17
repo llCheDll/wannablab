@@ -148,6 +148,19 @@ class Event(Items):
         return events.all()
 
 
+class EventPage(Items):
+    model = models.Event
+
+    def _get_items(self, session, model, request, **kwargs):
+        items = session.query(model).outerjoin(
+            models.User, model.members
+        ).filter(
+            model.id == kwargs['event_id']
+        ).all()
+
+        return items
+
+
 class User(Items):
     model = models.User
 
@@ -186,3 +199,4 @@ class UserProfile(Items):
         ).all()
 
         return items
+

@@ -16,6 +16,7 @@ from .handlers import (
     MessageReceived,
     Message,
     UserProfile,
+    EventPage
 )
 from .middlewares import DatabaseSessionManagerMiddleware
 
@@ -43,6 +44,7 @@ def configure_app(application):
         Message()
     )
     application.add_route('/api/v1/user/{user_id}/', UserProfile())
+    application.add_route('/api/v1/event/{event_id}/', EventPage())
 
     return application
 
