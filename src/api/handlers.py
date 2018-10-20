@@ -7,7 +7,6 @@ from .constants import Status, JWT_SECRET, JWT_ALGORITHM
 from .helpers import row2dict, load_template, logout, parse_data
 from db import models
 from datetime import datetime, timedelta
-from base import Session, engine, Base
 
 
 class Ping:
@@ -87,8 +86,6 @@ class Items:
     model = None
 
     def on_get(self, request, response, **kwargs):
-        # import ipdb
-        # ipdb.set_trace()
         session = request.context['session']
         items = self._get_items(session, self.model, **kwargs)
         data_list = [row2dict(item) for item in items]
