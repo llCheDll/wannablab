@@ -7,7 +7,8 @@ from .constants import Status, JWT_SECRET, JWT_ALGORITHM
 from .helpers import row2dict, load_template, logout, parse_data
 from db import models
 from datetime import datetime, timedelta
-
+from base import Session
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class Ping:
     def on_get(self, request, response):
@@ -21,6 +22,8 @@ class Authorization:
     def on_post(self, request, response):
         body = parse_data(request)
 
+        hash_pass = generate_password_hash(body['password'][0])
+
         model = models.User
         session = request.context['session']
 
@@ -28,7 +31,7 @@ class Authorization:
             email=body['email'][0]
         ).one_or_none()
 
-        if user is None or user.password != body['password'][0]:
+        if user is None or check_password_hash(hash_pass, user.password):
             response.body = ujson.dumps({"message": "Wrong credentialst"})
             response.status = falcon.HTTP_400
             return response
@@ -61,12 +64,13 @@ class Register:
         session = Session()
         body = parse_data(request)
         birthday = datetime.strptime(body['birthday'][0], '%Y-%M-%d').date()
+        hash_pass = generate_password_hash(body['password'][0])
         user = models.User(
             first_name=body['first_name'][0],
             last_name=body['last_name'][0],
             gender=body['gender'][0],
             birthday=birthday,
-            password=body['password'][0],
+            password=hash_pass,
             email=body['email'][0],
         )
         session.add(user)
