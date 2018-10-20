@@ -1,10 +1,13 @@
-import ujson
+import jwt
 import falcon
 from sqlalchemy import or_
+import ujson
 
-from .constants import Status
-from .helpers import row2dict
+from .constants import Status, JWT_SECRET, JWT_ALGORITHM
+from .helpers import row2dict, load_template, logout, parse_data
 from db import models
+from datetime import datetime, timedelta
+from base import Session, engine, Base
 
 
 class Ping:
@@ -14,10 +17,78 @@ class Ping:
         response.body = ujson.dumps({'status': Status.OK})
 
 
+class Authorization:
+    @falcon.before(logout)
+    def on_post(self, request, response):
+        body = parse_data(request)
+
+        model = models.User
+        session = request.context['session']
+
+        user = session.query(model).filter_by(
+            email=body['email'][0]
+        ).one_or_none()
+
+        if user is None or user.password != body['password'][0]:
+            response.body = ujson.dumps({"message": "Wrong credentialst"})
+            response.status = falcon.HTTP_400
+            return response
+
+        payload = {
+            'user_id': user.id,
+            'exp': datetime.now()+timedelta(days=10)
+        }
+
+        jwt_token = jwt.encode(payload, JWT_SECRET, JWT_ALGORITHM)
+
+        response.set_cookie(
+            'token', jwt_token.decode('utf-8'), path='/', secure=False
+        )
+        response.status = falcon.HTTP_301
+
+    def on_get(self, request, response):
+        if 'COOKIE' in request.headers:
+            template = load_template('logout.html')
+        else:
+            template = load_template('login.html')
+
+        response.status = falcon.HTTP_200
+        response.content_type = 'text/html'
+        response.body = template.render(something='testing')
+
+
+class Register:
+    def on_post(self, request, response):
+        session = Session()
+        body = parse_data(request)
+        birthday = datetime.strptime(body['birthday'][0], '%Y-%M-%d').date()
+        user = models.User(
+            first_name=body['first_name'][0],
+            last_name=body['last_name'][0],
+            gender=body['gender'][0],
+            birthday=birthday,
+            password=body['password'][0],
+            email=body['email'][0],
+        )
+        session.add(user)
+
+        session.commit()
+
+
+    def on_get(self, request, response):
+        template = load_template('register.html')
+
+        response.status = falcon.HTTP_200
+        response.content_type = 'text/html'
+        response.body = template.render(something='testing')
+
+
 class Items:
     model = None
 
     def on_get(self, request, response, **kwargs):
+        # import ipdb
+        # ipdb.set_trace()
         session = request.context['session']
         items = self._get_items(session, self.model, **kwargs)
         data_list = [row2dict(item) for item in items]

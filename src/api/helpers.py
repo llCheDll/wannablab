@@ -1,2 +1,34 @@
+import jinja2
+import os
+import falcon
+from urllib.parse import parse_qs
+
+
 def row2dict(row):
     return dict([(col.name, str(getattr(row, col.name))) for col in row.__table__.columns])
+
+
+def load_template(name):
+    path = os.path.join('templates', name)
+    with open(os.path.abspath(path), 'r') as fp:
+        return jinja2.Template(fp.read())
+
+
+def logout(request, response, *args, **kwargs):
+    if 'COOKIE' in request.headers:
+        response.set_cookie(
+            'token', '', path='/', secure=False
+        )
+        response.unset_cookie('token')
+        raise falcon.HTTPSeeOther('/api/v1/auth/')
+
+
+def parse_data(request):
+    body = request.stream.read()
+
+    if isinstance(body, bytes):
+        body = body.decode()
+
+    body = parse_qs(body)
+
+    return body

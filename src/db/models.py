@@ -13,6 +13,7 @@ from sqlalchemy import (
     UniqueConstraint,
     DateTime,
     Numeric,
+    JSON,
     func
 )
 
@@ -36,12 +37,12 @@ user_language_association = Table(
 )
 
 
-friends_association_table = Table(
-    'friends', Base.metadata,
-    Column('first_user', Integer, ForeignKey('user.id'), primary_key=True),
-    Column('second_user', Integer, ForeignKey('user.id'), primary_key=True),
-    UniqueConstraint('first_user', 'second_user', name='unique_friendships')
-)
+# friends_association_table = Table(
+#     'friends', Base.metadata,
+#     Column('first_user', Integer, ForeignKey('user.id'), primary_key=True),
+#     Column('second_user', Integer, ForeignKey('user.id'), primary_key=True),
+#     UniqueConstraint('first_user', 'second_user', name='unique_friendships')
+# )
 
 
 class User(Base):
@@ -65,9 +66,9 @@ class User(Base):
     rating = Column(Integer)
 
     language = relationship('Language', secondary=user_language_association)
-    friends = relationship('User', secondary=friends_association_table,
-                           primaryjoin=id == friends_association_table.c.first_user,
-                           secondaryjoin=id == friends_association_table.c.second_user)
+    # friends = relationship('User', secondary=friends_association_table,
+    #                        primaryjoin=id == friends_association_table.c.first_user,
+    #                        secondaryjoin=id == friends_association_table.c.second_user)
 
 
 class Category(Base):
@@ -226,3 +227,14 @@ class Message(Base):
     text = Column(Text, nullable=False)
 
     received = Column(Boolean, nullable=False)
+
+
+class Session(Base):
+    __tablename__ = 'session'
+
+    id = Column(Integer, primary_key=True)
+
+    user_id = Column(Integer)
+    session_id = Column(Integer)
+    data = Column(JSON)
+    expire = Column(DateTime)
