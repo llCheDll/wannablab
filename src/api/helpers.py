@@ -4,6 +4,7 @@ import os
 
 from datetime import datetime
 from urllib.parse import parse_qs
+from werkzeug.security import generate_password_hash
 
 
 def row2dict(row):
@@ -45,8 +46,6 @@ def parse_register(request):
     body = parse_qs(body)
 
     body['birthday'][0] = datetime.strptime(body['birthday'][0], '%Y-%M-%d').date()
-
-    # import ipdb
-    # ipdb.set_trace()
+    body['password'][0] = generate_password_hash(body['password'][0])
 
     return body

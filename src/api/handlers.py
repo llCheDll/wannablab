@@ -3,11 +3,12 @@ import falcon
 from sqlalchemy import or_
 import ujson
 
-from base import Session
 from .constants import Status, JWT_SECRET, JWT_ALGORITHM
 from .helpers import row2dict, load_template, logout, parse_data, parse_register
 from db import models
 from datetime import datetime, timedelta
+from base import Session
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class Ping:
@@ -22,6 +23,8 @@ class Authorization:
     def on_post(self, request, response):
         body = parse_data(request)
 
+        hash_pass = generate_password_hash(body['password'][0])
+
         model = models.User
         session = request.context['session']
 
@@ -29,7 +32,7 @@ class Authorization:
             email=body['email'][0]
         ).one_or_none()
 
-        if user is None or user.password != body['password'][0]:
+        if user is None or check_password_hash(hash_pass, user.password):
             response.body = ujson.dumps({"message": "Wrong credentialst"})
             response.status = falcon.HTTP_400
             return response
@@ -66,8 +69,8 @@ class Register:
             first_name=body['first_name'][0],
             last_name=body['last_name'][0],
             gender=body['gender'][0],
-            birthday=body['birthday'][0],
             password=body['password'][0],
+            birthday=body['birthday'][0],
             email=body['email'][0],
         )
         session.add(user)
