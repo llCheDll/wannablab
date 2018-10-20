@@ -3,8 +3,9 @@ import falcon
 from sqlalchemy import or_
 import ujson
 
+from base import Session
 from .constants import Status, JWT_SECRET, JWT_ALGORITHM
-from .helpers import row2dict, load_template, logout, parse_data
+from .helpers import row2dict, load_template, logout, parse_data, parse_register
 from db import models
 from datetime import datetime, timedelta
 
@@ -59,13 +60,13 @@ class Authorization:
 class Register:
     def on_post(self, request, response):
         session = Session()
-        body = parse_data(request)
-        birthday = datetime.strptime(body['birthday'][0], '%Y-%M-%d').date()
+        body = parse_register(request)
+
         user = models.User(
             first_name=body['first_name'][0],
             last_name=body['last_name'][0],
             gender=body['gender'][0],
-            birthday=birthday,
+            birthday=body['birthday'][0],
             password=body['password'][0],
             email=body['email'][0],
         )
@@ -73,6 +74,7 @@ class Register:
 
         session.commit()
 
+        raise falcon.HTTPSeeOther('/api/v1/auth/')
 
     def on_get(self, request, response):
         template = load_template('register.html')
