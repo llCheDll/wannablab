@@ -76,7 +76,6 @@ class FalconAuthMiddleware(object):
             if self._token_is_valid(token, request, response):
                 pass
 
-
     def _token_is_valid(self, token, request, response):
         jwt_token = token.split('=')[1]
 

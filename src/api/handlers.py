@@ -31,7 +31,7 @@ class Authorization:
             email=body['email'][0]
         ).one_or_none()
 
-        if user is None or check_password_hash(hash_pass, user.password):
+        if user is None or not check_password_hash(hash_pass, user.password):
             response.body = ujson.dumps({"message": "Wrong credentialst"})
             response.status = falcon.HTTP_400
             return response
@@ -46,7 +46,7 @@ class Authorization:
         response.set_cookie(
             'token', jwt_token.decode('utf-8'), path='/', secure=False
         )
-        response.status = falcon.HTTP_301
+        #response.status = falcon.HTTP_301
 
     def on_get(self, request, response):
         if 'COOKIE' in request.headers:
@@ -76,7 +76,6 @@ class Register:
         session.add(user)
 
         session.commit()
-
 
     def on_get(self, request, response):
         template = load_template('register.html')

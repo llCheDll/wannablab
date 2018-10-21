@@ -234,7 +234,7 @@ class Session(Base):
 
     id = Column(Integer, primary_key=True)
 
-    user_id = Column(Integer)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     session_id = Column(Integer)
     data = Column(JSON)
     expire = Column(DateTime)
