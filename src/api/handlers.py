@@ -4,11 +4,12 @@ from sqlalchemy import or_
 import ujson
 
 from .constants import Status, JWT_SECRET, JWT_ALGORITHM
-from .helpers import row2dict, load_template, logout, parse_data
+from .helpers import row2dict, load_template, logout, parse_data, parse_register
 from db import models
 from datetime import datetime, timedelta
 from base import Session
 from werkzeug.security import generate_password_hash, check_password_hash
+
 
 class Ping:
     def on_get(self, request, response):
@@ -76,6 +77,8 @@ class Register:
         session.add(user)
 
         session.commit()
+
+        raise falcon.HTTPSeeOther('/api/v1/auth/')
 
     def on_get(self, request, response):
         template = load_template('register.html')

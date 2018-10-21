@@ -1,7 +1,10 @@
+import falcon
 import jinja2
 import os
-import falcon
+
+from datetime import datetime
 from urllib.parse import parse_qs
+from werkzeug.security import generate_password_hash
 
 
 def row2dict(row):
@@ -30,5 +33,19 @@ def parse_data(request):
         body = body.decode()
 
     body = parse_qs(body)
+
+    return body
+
+
+def parse_register(request):
+    body = request.stream.read()
+
+    if isinstance(body, bytes):
+        body = body.decode()
+
+    body = parse_qs(body)
+
+    body['birthday'][0] = datetime.strptime(body['birthday'][0], '%Y-%M-%d').date()
+    body['password'][0] = generate_password_hash(body['password'][0])
 
     return body

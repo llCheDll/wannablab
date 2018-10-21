@@ -64,7 +64,13 @@ class DatabaseSessionManagerMiddleware(object):
 
 class FalconAuthMiddleware(object):
     def __init__(self):
-        self._unprotectedUri = ['/api/v1', '/api/v1/auth', '/api/v1/events', '/api/v1/users', '/api/v1/register']
+        self._unprotectedUri = [
+            '/api/v1',
+            '/api/v1/auth',
+            '/api/v1/events',
+            '/api/v1/users',
+            '/api/v1/register'
+        ]
 
     def process_request(self, request, response):
         if request.relative_uri not in self._unprotectedUri:
