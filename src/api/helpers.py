@@ -1,5 +1,6 @@
 import falcon
 import jinja2
+import json
 import os
 
 from datetime import datetime
@@ -49,3 +50,7 @@ def parse_register(request):
     body['password'][0] = generate_password_hash(body['password'][0])
 
     return body
+
+def get_data(request):
+    data = {'ip':request.remote_addr, 'user-agent':request.user_agent}
+    return json.dumps(data, ensure_ascii=False)

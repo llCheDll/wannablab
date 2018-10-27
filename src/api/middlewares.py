@@ -3,6 +3,8 @@ import jwt
 import sqlalchemy.orm.scoping as scoping
 from sqlalchemy.exc import SQLAlchemyError
 from .helpers import logout
+from db import models
+from datetime import datetime
 
 from config import settings
 from .constants import JWT_SECRET, JWT_ALGORITHM
@@ -89,7 +91,27 @@ class FalconAuthMiddleware(object):
             payload = jwt.decode(jwt_token, JWT_SECRET,
                                  algorithms=[JWT_ALGORITHM])
 
-        except (jwt.exceptions.DecodeError, jwt.exceptions.ExpiredSignatureError):
+            self._session_is_valid(payload, request, response)
+
+        except (
+                jwt.exceptions.DecodeError,
+                jwt.exceptions.ExpiredSignatureError,
+                falcon.HTTPUnauthorized
+        ):
             logout(request, response)
 
         return True
+
+    def _session_is_valid(self, payload, request, response):
+        model = models.Session
+        db_session = request.context['session']
+
+        session = db_session.query(model).filter_by(
+            id=payload['session_id']
+        ).one_or_none()
+
+        if session.expire <= datetime.now():
+            raise falcon.HTTPUnauthorized
+
+
+

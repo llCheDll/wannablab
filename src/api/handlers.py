@@ -4,7 +4,7 @@ from sqlalchemy import or_
 import ujson
 
 from .constants import Status, JWT_SECRET, JWT_ALGORITHM
-from .helpers import row2dict, load_template, logout, parse_data, parse_register
+from .helpers import row2dict, load_template, logout, parse_data, parse_register, get_data
 from db import models
 from datetime import datetime, timedelta
 from base import Session
@@ -39,6 +39,7 @@ class Authorization:
 
         payload = {
             'user_id': user.id,
+            'session_id': user.session[0].id,
             'exp': datetime.now()+timedelta(days=10)
         }
 
@@ -47,7 +48,6 @@ class Authorization:
         response.set_cookie(
             'token', jwt_token.decode('utf-8'), path='/', secure=False
         )
-        #response.status = falcon.HTTP_301
 
     def on_get(self, request, response):
         if 'COOKIE' in request.headers:
@@ -64,15 +64,20 @@ class Register:
     def on_post(self, request, response):
         session = Session()
         body = parse_data(request)
-        birthday = datetime.strptime(body['birthday'][0], '%Y-%M-%d').date()
-        hash_pass = generate_password_hash(body['password'][0])
         user = models.User(
             first_name=body['first_name'][0],
             last_name=body['last_name'][0],
             gender=body['gender'][0],
-            birthday=birthday,
-            password=hash_pass,
+            birthday=body['birthday'][0],
+            password=body['password'][0],
             email=body['email'][0],
+        )
+
+        user.session.append(
+            models.Session(
+                data=get_data(request),
+                expire=datetime.now() + timedelta(days=60),
+            )
         )
         session.add(user)
 

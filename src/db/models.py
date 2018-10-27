@@ -65,7 +65,10 @@ class User(Base):
     city = Column(String)
     rating = Column(Integer)
 
+    session = relationship("Session")
+
     language = relationship('Language', secondary=user_language_association)
+
     # friends = relationship('User', secondary=friends_association_table,
     #                        primaryjoin=id == friends_association_table.c.first_user,
     #                        secondaryjoin=id == friends_association_table.c.second_user)
@@ -234,7 +237,8 @@ class Session(Base):
 
     id = Column(Integer, primary_key=True)
 
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
-    session_id = Column(Integer)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False, unique=True)
+    user = relationship("User")
+
     data = Column(JSON)
     expire = Column(DateTime)
