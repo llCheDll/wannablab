@@ -13,7 +13,7 @@ def row2dict(row):
 
 
 def load_template(name):
-    path = os.path.join('templates', name)
+    path = os.path.join('static/examples', name)
     with open(os.path.abspath(path), 'r') as fp:
         return jinja2.Template(fp.read())
 
